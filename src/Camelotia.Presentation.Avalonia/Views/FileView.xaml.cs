@@ -1,6 +1,7 @@
 using System;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Avalonia.ReactiveUI;
 using Camelotia.Presentation.Interfaces;
@@ -25,7 +26,7 @@ public sealed partial class FileView : ReactiveUserControl<IFileViewModel>
 
             ContextMenu
                 .Events()
-                .MenuOpened
+                .Opening
                 .Subscribe(args => ViewModel.Provider.SelectedFile = ViewModel)
                 .DisposeWith(disposables);
         });

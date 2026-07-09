@@ -1,4 +1,5 @@
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Layout;
@@ -23,7 +24,7 @@ public sealed partial class AuthView : ReactiveUserControl<IAuthViewModel>
         });
     }
 
-    private static IControl ResolveControl(IAuthViewModel context)
+    private static Control ResolveControl(IAuthViewModel context)
     {
         if (context.SupportsHostAuth)
             return new HostAuthView { DataContext = context.HostAuth };

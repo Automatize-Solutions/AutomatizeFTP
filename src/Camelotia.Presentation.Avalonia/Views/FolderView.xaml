@@ -40,8 +40,16 @@
             <MenuItem Name="TopLevelMenu" Items="{Binding Children}">
               <MenuItem.Header>
                 <Panel>
-                  <DrawingPresenter Name="ArrowRight" MaxHeight="16" MaxWidth="16" Drawing="{DynamicResource ChevronRight}"/>
-                  <DrawingPresenter Name="ArrowDown" MaxHeight="16" MaxWidth="16" Drawing="{DynamicResource ChevronDown}"/>
+                  <Image Name="ArrowRight" MaxHeight="16" MaxWidth="16">
+                    <Image.Source>
+                      <DrawingImage Drawing="{DynamicResource ChevronRight}"/>
+                    </Image.Source>
+                  </Image>
+                  <Image Name="ArrowDown" MaxHeight="16" MaxWidth="16">
+                    <Image.Source>
+                      <DrawingImage Drawing="{DynamicResource ChevronDown}"/>
+                    </Image.Source>
+                  </Image>
                 </Panel>
               </MenuItem.Header>
               <MenuItem.Styles>

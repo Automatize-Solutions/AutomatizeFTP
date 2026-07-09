@@ -4,7 +4,6 @@
     xmlns:views="clr-namespace:Camelotia.Presentation.Avalonia.Views"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:designTime="clr-namespace:Camelotia.Presentation.DesignTime;assembly=Camelotia.Presentation"
-    xmlns:reactiveUi="http://reactiveui.net"
     x:Class="Camelotia.Presentation.Avalonia.Views.MainView"
     MinHeight="590" MinWidth="850" 
     Height="590" Width="850"
@@ -29,11 +28,14 @@
     <Grid Background="{DynamicResource ThemeBackgroundBrush}" ColumnDefinitions="1*,2*">
         <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*,Auto">
             <StackPanel Grid.Row="0" Orientation="Horizontal">
-                <DrawingPresenter VerticalAlignment="Top"
-                                  Margin="20 10 0 0"
-                                  Height="25"
-                                  Width="30"
-                                  Drawing="{DynamicResource LogoDrawing}"/>
+                <Image VerticalAlignment="Top"
+                       Margin="20 10 0 0"
+                       Height="25"
+                       Width="30">
+                    <Image.Source>
+                        <DrawingImage Drawing="{DynamicResource LogoDrawing}"/>
+                    </Image.Source>
+                </Image>
                 <TextBlock Text="Camelotia"
                            VerticalAlignment="Bottom"
                            Margin="15 14 15 10"
@@ -62,12 +64,15 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="interfaces:ICloudViewModel">
                         <Grid ColumnDefinitions="Auto, *">
-                            <DrawingPresenter Grid.Column="0"
-                                              Opacity="0.5"
-                                              Margin="10 0 5 0"
-                                              Height="60"
-                                              Width="60"
-                                              Drawing="{DynamicResource CloudDrawing}"/>                                
+                            <Image Grid.Column="0"
+                                   Opacity="0.5"
+                                   Margin="10 0 5 0"
+                                   Height="60"
+                                   Width="60">
+                                <Image.Source>
+                                    <DrawingImage Drawing="{DynamicResource CloudDrawing}"/>
+                                </Image.Source>
+                            </Image>                                
                             <StackPanel Grid.Column="1" Margin="10 5">
                                 <TextBlock Text="{Binding Name}"
                                            FontSize="15" />
@@ -100,14 +105,14 @@
                          IsVisible="{Binding IsLoading}" />
         </Grid>
         <Grid Grid.Column="1">
-            <reactiveUi:TransitioningContentControl IsVisible="{Binding WelcomeScreenCollapsed, Mode=OneWay}">
-                <reactiveUi:TransitioningContentControl.PageTransition>
+            <TransitioningContentControl IsVisible="{Binding WelcomeScreenCollapsed, Mode=OneWay}">
+                <TransitioningContentControl.PageTransition>
                     <CrossFade Duration="0.75" />
-                </reactiveUi:TransitioningContentControl.PageTransition>
-                <reactiveUi:TransitioningContentControl.Content>
+                </TransitioningContentControl.PageTransition>
+                <TransitioningContentControl.Content>
                     <views:ProviderView DataContext="{Binding SelectedProvider, Mode=OneWay}" />
-                </reactiveUi:TransitioningContentControl.Content>
-            </reactiveUi:TransitioningContentControl>
+                </TransitioningContentControl.Content>
+            </TransitioningContentControl>
             <Grid IsVisible="{Binding WelcomeScreenVisible, Mode=OneWay}"
                   Background="{DynamicResource ThemeCardBrush}">
                 <StackPanel HorizontalAlignment="Center"

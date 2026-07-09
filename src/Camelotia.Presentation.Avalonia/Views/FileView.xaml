@@ -16,18 +16,24 @@
         </ContextMenu>
     </UserControl.ContextMenu>
     <Grid Margin="10 0" ColumnDefinitions="Auto,3*,1*,1*,2*">
-        <DrawingPresenter Grid.Column="0" 
-                          IsVisible="{Binding IsFolder}"
-                          Width="16" 
-                          Height="16"
-                          Margin="0 0 10 0"
-                          Drawing="{DynamicResource FolderDrawing}"/>
-        <DrawingPresenter Grid.Column="0"
-                          IsVisible="{Binding IsFile}"
-                          Width="16"
-                          Height="16"
-                          Margin="0 0 10 0"
-                          Drawing="{DynamicResource FileDrawing}"/>
+        <Image Grid.Column="0"
+               IsVisible="{Binding IsFolder}"
+               Width="16"
+               Height="16"
+               Margin="0 0 10 0">
+            <Image.Source>
+                <DrawingImage Drawing="{DynamicResource FolderDrawing}"/>
+            </Image.Source>
+        </Image>
+        <Image Grid.Column="0"
+               IsVisible="{Binding IsFile}"
+               Width="16"
+               Height="16"
+               Margin="0 0 10 0">
+            <Image.Source>
+                <DrawingImage Drawing="{DynamicResource FileDrawing}"/>
+            </Image.Source>
+        </Image>
         <TextBlock Grid.Column="1"
                    Text="{Binding Name}"
                    VerticalAlignment="Center"

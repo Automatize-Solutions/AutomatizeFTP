@@ -44,7 +44,11 @@
                         Command="{Binding Back}"
                         ToolTip.Tip="Back"
                         Classes="Primary">
-                <DrawingPresenter Height="16" Drawing="{DynamicResource ArrowUp}"/>
+                <Image Height="16">
+                  <Image.Source>
+                    <DrawingImage Drawing="{DynamicResource ArrowUp}"/>
+                  </Image.Source>
+                </Image>
               </Button>
                 <TextBlock Grid.Column="1"
                            IsVisible="{Binding HideBreadCrumbs}"
@@ -61,7 +65,11 @@
                         HorizontalAlignment="Stretch"
                         ToolTip.Tip="Open"
                         Classes="Primary">
-                  <DrawingPresenter Height="16" Drawing="{DynamicResource ArrowDown}"/>
+                  <Image Height="16">
+                    <Image.Source>
+                      <DrawingImage Drawing="{DynamicResource ArrowDown}"/>
+                    </Image.Source>
+                  </Image>
                 </Button>
             </Grid>
             <Border Grid.Row="1" 
