@@ -94,8 +94,16 @@ public sealed class CloudViewModel : ReactiveObject, ICloudViewModel, IActivatab
             () => Path.Combine(CurrentPath, SelectedFile.Name),
             canOpenCurrentPath);
 
+        // Back and CurrentPath are mutually dependent: this pipeline gates Back,
+        // while the CurrentPath helper below is fed by Back. The helper therefore
+        // does not exist yet, and CurrentPath still reads null, which Where would
+        // swallow -- leaving CombineLatest without a first value and Back disabled
+        // forever. Seed the pipeline with the very value the helper starts from.
+        var initialPath = state.CurrentPath ?? cloud.InitialPath;
+
         var canCurrentPathGoBack = this
             .WhenAnyValue(x => x.CurrentPath)
+            .StartWith(initialPath)
             .Where(path => path != null)
             .Select(path => path.Length > cloud.InitialPath.Length)
             .CombineLatest(Refresh.IsExecuting, canInteract, (valid, busy, ci) => valid && ci && !busy);
@@ -112,7 +120,7 @@ public sealed class CloudViewModel : ReactiveObject, ICloudViewModel, IActivatab
             .Select(path => path ?? cloud.InitialPath)
             .DistinctUntilChanged()
             .Log(this, $"Current path changed in {cloud.Name}")
-            .ToProperty(this, x => x.CurrentPath, state.CurrentPath ?? cloud.InitialPath);
+            .ToProperty(this, x => x.CurrentPath, initialPath);
 
         var getBreadCrumbs = ReactiveCommand.CreateFromTask(
             () => cloud.GetBreadCrumbs(CurrentPath));
