@@ -15,7 +15,7 @@ public sealed class CloudFactoryTests
     [Fact]
     public void SupportedProviderTypesShouldNotBeEmpty()
     {
-        var factory = new CloudFactory(_state.CloudConfiguration);
+        var factory = new CloudFactory();
         factory.SupportedClouds.Should().NotBeEmpty();
         factory.SupportedClouds.Should().Contain(CloudType.Local);
         factory.SupportedClouds.Should().Contain(CloudType.Ftp);
@@ -24,7 +24,7 @@ public sealed class CloudFactoryTests
     [Fact]
     public void ShouldInstantiateSupportedProviders()
     {
-        var factory = new CloudFactory(_state.CloudConfiguration);
+        var factory = new CloudFactory();
         var provider = factory.CreateCloud(new CloudParameters { Type = CloudType.Local });
         provider.Should().NotBeNull();
         provider.Name.Should().Be(CloudType.Local.ToString());

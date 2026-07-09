@@ -155,7 +155,7 @@ public sealed class MainViewModelTests
         RxApp.TaskpoolScheduler = Scheduler.Immediate;
         return new MainViewModel(
             _state,
-            new CloudFactory(_state.CloudConfiguration),
+            new CloudFactory(),
             (state, provider) =>
             {
                 var entry = Substitute.For<ICloudViewModel>();

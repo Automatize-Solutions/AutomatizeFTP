@@ -1,4 +1,3 @@
-using Camelotia.Services.Configuration;
 using Camelotia.Services.Interfaces;
 using Camelotia.Services.Models;
 using Camelotia.Services.Providers;
@@ -7,13 +6,8 @@ namespace Camelotia.Services;
 
 public sealed class CloudFactory : ICloudFactory
 {
-    private readonly CloudConfiguration _configuration;
-
-    public CloudFactory(
-        CloudConfiguration configuration,
-        IReadOnlyCollection<CloudType> supported = null)
+    public CloudFactory(IReadOnlyCollection<CloudType> supported = null)
     {
-        _configuration = configuration;
         SupportedClouds = supported ?? new[]
         {
             CloudType.Local,

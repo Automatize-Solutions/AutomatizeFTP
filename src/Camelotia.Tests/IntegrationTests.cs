@@ -51,7 +51,7 @@ public sealed class IntegrationTests
         RxApp.TaskpoolScheduler = Scheduler.Immediate;
         return new MainViewModel(
             _state,
-            new CloudFactory(_state.CloudConfiguration),
+            new CloudFactory(),
             (state, provider) => new CloudViewModel(
                 state,
                 owner => new CreateFolderViewModel(state.CreateFolderState, owner, provider),
