@@ -19,7 +19,7 @@ public sealed class CloudFactoryTests
         var factory = new CloudFactory(_state.CloudConfiguration, _authenticator);
         factory.SupportedClouds.Should().NotBeEmpty();
         factory.SupportedClouds.Should().Contain(CloudType.Local);
-        factory.SupportedClouds.Should().Contain(CloudType.GitHub);
+        factory.SupportedClouds.Should().Contain(CloudType.Ftp);
     }
 
     [Fact]

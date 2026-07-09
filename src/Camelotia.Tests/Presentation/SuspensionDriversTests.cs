@@ -28,7 +28,7 @@ public class SuspensionDriversTests
     {
         var state = new MainState
         {
-            SelectedSupportedType = CloudType.GitHub
+            SelectedSupportedType = CloudType.Sftp
         };
 
         state.Clouds.AddOrUpdate(new CloudState());
@@ -49,7 +49,7 @@ public class SuspensionDriversTests
         loaded.Should().BeOfType<MainState>();
 
         var retyped = (MainState)loaded;
-        retyped.SelectedSupportedType.Should().Be(CloudType.GitHub);
+        retyped.SelectedSupportedType.Should().Be(CloudType.Sftp);
         retyped.Clouds.Count.Should().Be(2);
         retyped.CloudStates.Should().NotBeEmpty();
         retyped.CloudStates.Should().Contain(provider =>

@@ -6,8 +6,5 @@ namespace Camelotia.Services.Configuration;
 public class CloudConfiguration
 {
     [DataMember]
-    public GitHubCloudOptions GitHub { get; set; } = new();
-
-    [DataMember]
     public YandexDiskCloudOptions YandexDisk { get; set; } = new();
 }

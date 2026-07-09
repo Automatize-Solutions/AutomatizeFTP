@@ -22,8 +22,7 @@ public sealed class CloudFactory : ICloudFactory
             CloudType.Local,
             CloudType.Ftp,
             CloudType.Sftp,
-            CloudType.Yandex,
-            CloudType.GitHub
+            CloudType.Yandex
         };
     }
 
@@ -32,7 +31,6 @@ public sealed class CloudFactory : ICloudFactory
     public ICloud CreateCloud(CloudParameters parameters) => parameters.Type switch
     {
         CloudType.Ftp => new FtpCloud(parameters),
-        CloudType.GitHub => new GitHubCloud(parameters, _configuration.GitHub),
         CloudType.Local => new LocalCloud(parameters),
         CloudType.Sftp => new SftpCloud(parameters),
         CloudType.Yandex => new YandexDiskCloud(parameters, _authenticator, _configuration.YandexDisk),
