@@ -19,4 +19,4 @@ jobs:
       useMauiCheckDotNetTool: false
       installWindowsSdk: false
       installWorkflows: false
-      solutionFile: 'Camelotia.sln'
+      solutionFile: 'Camelotia.slnx'

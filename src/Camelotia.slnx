@@ -1,0 +1,16 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="../.editorconfig" />
+    <File Path="../.gitignore" />
+    <File Path="Directory.build.props" />
+    <File Path="stylecop.json" />
+  </Folder>
+  <Project Path="../build/build.csproj" />
+  <Project Path="Camelotia.Presentation.Avalonia/Camelotia.Presentation.Avalonia.csproj" />
+  <Project Path="Camelotia.Presentation/Camelotia.Presentation.csproj" />
+  <Project Path="Camelotia.Services/Camelotia.Services.csproj" />
+  <Project Path="Camelotia.Tests/Camelotia.Tests.csproj" />
+</Solution>
