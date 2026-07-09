@@ -6,6 +6,5 @@ public enum CloudType
     GitHub,
     Local,
     Sftp,
-    VkDocs,
     Yandex
 }

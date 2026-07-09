@@ -23,8 +23,7 @@ public sealed class CloudFactory : ICloudFactory
             CloudType.Ftp,
             CloudType.Sftp,
             CloudType.Yandex,
-            CloudType.GitHub,
-            CloudType.VkDocs
+            CloudType.GitHub
         };
     }
 
@@ -36,7 +35,6 @@ public sealed class CloudFactory : ICloudFactory
         CloudType.GitHub => new GitHubCloud(parameters, _configuration.GitHub),
         CloudType.Local => new LocalCloud(parameters),
         CloudType.Sftp => new SftpCloud(parameters),
-        CloudType.VkDocs => new VkDocsCloud(parameters, _configuration.VkDocs),
         CloudType.Yandex => new YandexDiskCloud(parameters, _authenticator, _configuration.YandexDisk),
         _ => throw new ArgumentOutOfRangeException(nameof(parameters))
     };
