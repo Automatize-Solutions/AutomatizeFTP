@@ -37,7 +37,7 @@
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="{Binding Name}"/>
           <Menu>
-            <MenuItem Name="TopLevelMenu" Items="{Binding Children}">
+            <MenuItem Name="TopLevelMenu" ItemsSource="{Binding Children}">
               <MenuItem.Header>
                 <Panel>
                   <Image Name="ArrowRight" MaxHeight="16" MaxWidth="16">

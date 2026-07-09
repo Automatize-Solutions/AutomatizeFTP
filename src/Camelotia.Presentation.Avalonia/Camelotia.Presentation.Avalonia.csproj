@@ -21,13 +21,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Avalonia 11 compiles and embeds XAML through AvaloniaResource. The old
+         EmbeddedResource + AdditionalFiles pair is the 0.10 layout: it still fed
+         the XAML compiler, so the build passed, but nothing shipped the compiled
+         XAML and the app died at Initialize(). -->
+    <AvaloniaResource Include="**\*.xaml" />
     <Compile Update="**\*.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="**\*.xaml">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <AdditionalFiles Include="**\*.xaml" />
   </ItemGroup>
 
 </Project>

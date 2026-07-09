@@ -58,7 +58,7 @@
                            Margin="15 0" />
                 <ListBox Grid.Column="1"
                          IsVisible="{Binding ShowBreadCrumbs}"
-                         Items="{Binding BreadCrumbs}"
+                         ItemsSource="{Binding BreadCrumbs}"
                          Classes="BreadCrumb"/>          
                 <Button Grid.Column="2"
                         Command="{Binding Open}"
@@ -80,7 +80,7 @@
                              Background="{DynamicResource ThemeCardBrush}"
                              BorderThickness="0"
                              SelectionMode="Toggle"
-                             Items="{Binding Files}"
+                             ItemsSource="{Binding Files}"
                              IsVisible="{Binding IsReady}"
                              ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                              SelectedItem="{Binding SelectedFile, Mode=TwoWay}">

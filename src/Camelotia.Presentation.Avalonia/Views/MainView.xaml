@@ -44,7 +44,7 @@
             <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
                 <ComboBox Grid.Column="0" 
                           Margin="12 6 12 12"
-                          Items="{Binding SupportedTypes, Mode=OneWay}"
+                          ItemsSource="{Binding SupportedTypes, Mode=OneWay}"
                           SelectedItem="{Binding SelectedSupportedType, Mode=TwoWay}" />
                 <Button Grid.Column="1"
                         BorderThickness="0"
@@ -59,7 +59,7 @@
                      BorderThickness="0"
                      IsVisible="{Binding IsReady}"
                      SelectedItem="{Binding SelectedProvider, Mode=TwoWay}"
-                     Items="{Binding Clouds, Mode=OneWay}"
+                     ItemsSource="{Binding Clouds, Mode=OneWay}"
                      Background="Transparent">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="interfaces:ICloudViewModel">
