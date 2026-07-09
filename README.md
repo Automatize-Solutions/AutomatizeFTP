@@ -8,7 +8,7 @@ Camelotia is a sample cross-platform application built with reactive extensions,
 
 <img src="images/UiAvalonia.png" width="550">
 
-In order to compile .NET Standard libraries, run tests and run the <a href="https://github.com/avaloniaui">Avalonia</a> application on Windows, Linux or MacOS operating system make sure to have latest [.NET Core SDK](https://dot.net/) installed. Launch the `Camelotia.Avalonia.sln` file to browse or to edit source files. Camelotia uses [Nuke Build](https://github.com/nuke-build/nuke) to build and test the solution. Execute the following commands to run the build scripts on Linux or MacOS:
+In order to compile .NET Standard libraries, run tests and run the <a href="https://github.com/avaloniaui">Avalonia</a> application on Windows, Linux or MacOS operating system make sure to have latest [.NET Core SDK](https://dot.net/) installed. Launch the `Camelotia.sln` file to browse or to edit source files. Camelotia uses [Nuke Build](https://github.com/nuke-build/nuke) to build and test the solution. Execute the following commands to run the build scripts on Linux or MacOS:
 
 ```sh
 # Linux or MacOS shell. Launches the Avalonia app after build.
