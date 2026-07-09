@@ -33,7 +33,6 @@ cd ./Camelotia && powershell -ExecutionPolicy Unrestricted ./build.ps1 --interac
 - <a href="https://github.com/reactiveui/DynamicData">DynamicData</a> reactive collections
 - <a href="https://github.com/avaloniaui">AvaloniaUI</a> cross-platform XAML-based GUI framework
 - <a href="https://github.com/worldbeater/citrus.avalonia">Citrus.Avalonia</a> bright and modern AvaloniaUI theme
-- <a href="https://github.com/reactiveui/Akavache">Akavache</a> persistent key-value store
 - <a href="https://github.com/nuke-build/nuke">Nuke</a> build automation system for C#/.NET
 - <a href="https://github.com/xunit/xunit">XUnit</a> unit testing tool for .NET
 - <a href="https://github.com/tonerdo/coverlet">Coverlet</a> code coverage analyzer

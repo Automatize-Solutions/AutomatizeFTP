@@ -19,11 +19,6 @@ public class SuspensionDriversTests
         SuspensionDriverShouldSaveAndLoadState(
             new NewtonsoftJsonSuspensionDriver(Path.GetTempFileName()));
 
-    [Fact]
-    public Task AkavacheSuspensionDriverShouldSaveAndLoadState() =>
-        SuspensionDriverShouldSaveAndLoadState(
-            new AkavacheSuspensionDriver<MainState>("Camelotia-Tests"));
-
     private static async Task SuspensionDriverShouldSaveAndLoadState(ISuspensionDriver driver)
     {
         var state = new MainState

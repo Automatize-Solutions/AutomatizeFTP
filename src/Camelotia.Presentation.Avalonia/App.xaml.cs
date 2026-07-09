@@ -20,7 +20,6 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        Akavache.BlobCache.ApplicationName = "CamelotiaV2";
         var suspension = new AutoSuspendHelper(ApplicationLifetime);
         RxApp.SuspensionHost.CreateNewAppState = () => new MainState();
         RxApp.SuspensionHost.SetupDefaultSuspendResume(new NewtonsoftJsonSuspensionDriver("appstate.json"));
