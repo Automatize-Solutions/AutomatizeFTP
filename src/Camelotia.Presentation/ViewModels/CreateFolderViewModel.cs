@@ -1,4 +1,5 @@
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Camelotia.Presentation.AppState;
 using Camelotia.Presentation.Interfaces;
@@ -19,11 +20,11 @@ public sealed partial class CreateFolderViewModel : ReactiveValidationObject, IC
     private readonly ObservableAsPropertyHelper<bool> _isLoading;
     private readonly ObservableAsPropertyHelper<string> _path;
 
-    public CreateFolderViewModel(CreateFolderState state, ICloudViewModel owner, ICloud provider)
+    public CreateFolderViewModel(CreateFolderState state, ICloudViewModel owner, ICloud provider, IScheduler scheduler)
     {
         _path = owner
             .WhenAnyValue(x => x.CurrentPath)
-            .ToProperty(this, x => x.Path);
+            .ToProperty(this, x => x.Path, scheduler: scheduler);
 
         this.ValidationRule(
             x => x.Name,
@@ -37,10 +38,11 @@ public sealed partial class CreateFolderViewModel : ReactiveValidationObject, IC
 
         Create = ReactiveCommand.CreateFromTask(
             () => provider.CreateFolder(Path, Name),
-            this.IsValid());
+            this.IsValid(),
+            outputScheduler: scheduler);
 
         _isLoading = Create.IsExecuting
-            .ToProperty(this, x => x.IsLoading);
+            .ToProperty(this, x => x.IsLoading, scheduler: scheduler);
 
         var canInteract = owner
             .WhenAnyValue(x => x.CanInteract)
@@ -59,8 +61,8 @@ public sealed partial class CreateFolderViewModel : ReactiveValidationObject, IC
             .WhenAnyValue(x => x.IsVisible)
             .Select(visible => visible);
 
-        Open = ReactiveCommand.Create(() => { }, canOpen);
-        Close = ReactiveCommand.Create(() => { }, canClose);
+        Open = ReactiveCommand.Create(() => { }, canOpen, outputScheduler: scheduler);
+        Close = ReactiveCommand.Create(() => { }, canClose, outputScheduler: scheduler);
 
         Open.Select(unit => true)
             .Merge(Close.Select(unit => false))
@@ -73,14 +75,14 @@ public sealed partial class CreateFolderViewModel : ReactiveValidationObject, IC
             .ThrownExceptions
             .Select(exception => true)
             .Merge(Close.Select(unit => false))
-            .ToProperty(this, x => x.HasErrorMessage);
+            .ToProperty(this, x => x.HasErrorMessage, scheduler: scheduler);
 
         _errorMessage = Create
             .ThrownExceptions
             .Select(exception => exception.Message)
             .Log(this, $"Create folder error occured in {provider.Name}")
             .Merge(Close.Select(unit => string.Empty))
-            .ToProperty(this, x => x.ErrorMessage);
+            .ToProperty(this, x => x.ErrorMessage, scheduler: scheduler);
 
         Name = state.Name;
         IsVisible = state.IsVisible;

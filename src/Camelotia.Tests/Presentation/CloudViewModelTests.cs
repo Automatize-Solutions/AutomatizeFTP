@@ -237,8 +237,7 @@ public sealed class CloudViewModelTests
 
     private CloudViewModel BuildProviderViewModel()
     {
-        RxApp.MainThreadScheduler = Scheduler.Immediate;
-        RxApp.TaskpoolScheduler = Scheduler.Immediate;
+        var scheduler = ImmediateScheduler.Instance;
         return new CloudViewModel(
             _state,
             x => _folder,
@@ -247,6 +246,7 @@ public sealed class CloudViewModelTests
             (x, y) => new FolderViewModel(y, x),
             _auth,
             _files,
-            _cloud);
+            _cloud,
+            scheduler);
     }
 }

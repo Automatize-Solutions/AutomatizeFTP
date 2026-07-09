@@ -1,4 +1,5 @@
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Camelotia.Presentation.AppState;
 using Camelotia.Presentation.Interfaces;
@@ -16,7 +17,7 @@ public sealed partial class HostAuthViewModel : ReactiveValidationObject, IHostA
     private readonly ObservableAsPropertyHelper<bool> _hasErrorMessage;
     private readonly ObservableAsPropertyHelper<bool> _isBusy;
 
-    public HostAuthViewModel(HostAuthState state, ICloud provider)
+    public HostAuthViewModel(HostAuthState state, ICloud provider, IScheduler scheduler)
     {
         this.ValidationRule(
             x => x.Username,
@@ -40,23 +41,24 @@ public sealed partial class HostAuthViewModel : ReactiveValidationObject, IHostA
 
         Login = ReactiveCommand.CreateFromTask(
             () => provider.HostAuth(Address, int.Parse(Port), Username, Password),
-            this.IsValid());
+            this.IsValid(),
+            outputScheduler: scheduler);
 
         _isBusy = Login
             .IsExecuting
-            .ToProperty(this, x => x.IsBusy);
+            .ToProperty(this, x => x.IsBusy, scheduler: scheduler);
 
         _errorMessage = Login
             .ThrownExceptions
             .Select(exception => exception.Message)
             .Log(this, $"Host auth error occured in {provider.Name}")
-            .ToProperty(this, x => x.ErrorMessage);
+            .ToProperty(this, x => x.ErrorMessage, scheduler: scheduler);
 
         _hasErrorMessage = Login
             .ThrownExceptions
             .Select(exception => true)
             .Merge(Login.Select(unit => false))
-            .ToProperty(this, x => x.HasErrorMessage);
+            .ToProperty(this, x => x.HasErrorMessage, scheduler: scheduler);
 
         Username = state.Username;
         Password = state.Password;

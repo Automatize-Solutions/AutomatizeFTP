@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Camelotia.Presentation.AppState;
 using Camelotia.Presentation.Interfaces;
@@ -21,26 +22,26 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
     private readonly ObservableAsPropertyHelper<bool> _isReady;
     private readonly ICloudFactory _factory;
 
-    public MainViewModel(MainState state, ICloudFactory factory, CloudViewModelFactory createViewModel)
+    public MainViewModel(MainState state, ICloudFactory factory, CloudViewModelFactory createViewModel, IScheduler scheduler)
     {
         _factory = factory;
-        Refresh = ReactiveCommand.Create(state.Clouds.Refresh);
+        Refresh = ReactiveCommand.Create(state.Clouds.Refresh, outputScheduler: scheduler);
 
         _isLoading = Refresh
             .IsExecuting
-            .ToProperty(this, x => x.IsLoading);
+            .ToProperty(this, x => x.IsLoading, scheduler: scheduler);
 
         _isReady = Refresh
             .IsExecuting
             .Select(executing => !executing)
-            .ToProperty(this, x => x.IsReady);
+            .ToProperty(this, x => x.IsReady, scheduler: scheduler);
 
         state
             .Clouds
             .Connect()
             .Transform(ps => createViewModel(ps, factory.CreateCloud(ps.Parameters)))
             .Sort(SortExpressionComparer<ICloudViewModel>.Descending(x => x.Created))
-            .ObserveOn(RxApp.MainThreadScheduler)
+            .ObserveOn(scheduler)
             .Bind(out _providers)
             .Subscribe();
 
@@ -50,7 +51,8 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
 
         Remove = ReactiveCommand.Create(
             () => state.Clouds.RemoveKey(SelectedProvider.Id),
-            canRemove);
+            canRemove,
+            outputScheduler: scheduler);
 
         var canAddProvider = this
             .WhenAnyValue(x => x.SelectedSupportedType)
@@ -58,23 +60,24 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
 
         Add = ReactiveCommand.Create(
             () => state.Clouds.AddOrUpdate(new CloudState { Type = SelectedSupportedType }),
-            canAddProvider);
+            canAddProvider,
+            outputScheduler: scheduler);
 
         _welcomeScreenVisible = this
             .WhenAnyValue(x => x.SelectedProvider)
             .Select(provider => provider == null)
-            .ToProperty(this, x => x.WelcomeScreenVisible);
+            .ToProperty(this, x => x.WelcomeScreenVisible, scheduler: scheduler);
 
         _welcomeScreenCollapsed = this
             .WhenAnyValue(x => x.WelcomeScreenVisible)
             .Select(visible => !visible)
-            .ToProperty(this, x => x.WelcomeScreenCollapsed);
+            .ToProperty(this, x => x.WelcomeScreenCollapsed, scheduler: scheduler);
 
         var canUnselect = this
             .WhenAnyValue(x => x.SelectedProvider)
             .Select(provider => provider != null);
 
-        Unselect = ReactiveCommand.Create(() => Unit.Default, canUnselect);
+        Unselect = ReactiveCommand.Create(() => Unit.Default, canUnselect, outputScheduler: scheduler);
         Unselect.Subscribe(unit => SelectedProvider = null);
 
         var outputCollectionChanges = Clouds
@@ -84,7 +87,7 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
 
         outputCollectionChanges
             .Filter(provider => provider.Id == state.SelectedProviderId)
-            .ObserveOn(RxApp.MainThreadScheduler)
+            .ObserveOn(scheduler)
             .OnItemAdded(provider => SelectedProvider = provider)
             .Subscribe();
 

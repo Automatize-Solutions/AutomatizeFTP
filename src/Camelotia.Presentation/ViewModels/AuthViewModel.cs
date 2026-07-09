@@ -1,3 +1,4 @@
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Camelotia.Presentation.Interfaces;
 using Camelotia.Services.Interfaces;
@@ -11,7 +12,7 @@ public sealed class AuthViewModel : ReactiveObject, IAuthViewModel
     private readonly ObservableAsPropertyHelper<bool> _isAnonymous;
     private readonly ICloud _provider;
 
-    public AuthViewModel(IHostAuthViewModel host, ICloud provider)
+    public AuthViewModel(IHostAuthViewModel host, ICloud provider, IScheduler scheduler)
     {
         HostAuth = host;
         _provider = provider;
@@ -20,13 +21,13 @@ public sealed class AuthViewModel : ReactiveObject, IAuthViewModel
             .IsAuthorized
             .DistinctUntilChanged()
             .Log(this, $"Authentication state changed for {provider.Name}")
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .ToProperty(this, x => x.IsAuthenticated);
+            .ObserveOn(scheduler)
+            .ToProperty(this, x => x.IsAuthenticated, scheduler: scheduler);
 
         _isAnonymous = this
             .WhenAnyValue(x => x.IsAuthenticated)
             .Select(authenticated => !authenticated)
-            .ToProperty(this, x => x.IsAnonymous);
+            .ToProperty(this, x => x.IsAnonymous, scheduler: scheduler);
     }
 
     public bool IsAnonymous => _isAnonymous.Value;

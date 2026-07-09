@@ -1,4 +1,5 @@
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Camelotia.Presentation.AppState;
 using Camelotia.Presentation.Interfaces;
@@ -19,11 +20,11 @@ public sealed partial class RenameFileViewModel : ReactiveValidationObject, IRen
     private readonly ObservableAsPropertyHelper<bool> _isLoading;
     private readonly ObservableAsPropertyHelper<string> _oldName;
 
-    public RenameFileViewModel(RenameFileState state, ICloudViewModel owner, ICloud provider)
+    public RenameFileViewModel(RenameFileState state, ICloudViewModel owner, ICloud provider, IScheduler scheduler)
     {
         _oldName = owner
             .WhenAnyValue(x => x.SelectedFile.Name)
-            .ToProperty(this, x => x.OldName);
+            .ToProperty(this, x => x.OldName, scheduler: scheduler);
 
         this.ValidationRule(
             x => x.NewName,
@@ -37,11 +38,12 @@ public sealed partial class RenameFileViewModel : ReactiveValidationObject, IRen
 
         Rename = ReactiveCommand.CreateFromTask(
             () => provider.RenameFile(owner.SelectedFile.Path, NewName),
-            this.IsValid());
+            this.IsValid(),
+            outputScheduler: scheduler);
 
         _isLoading = Rename
             .IsExecuting
-            .ToProperty(this, x => x.IsLoading);
+            .ToProperty(this, x => x.IsLoading, scheduler: scheduler);
 
         var canInteract = owner
             .WhenAnyValue(x => x.CanInteract)
@@ -60,8 +62,8 @@ public sealed partial class RenameFileViewModel : ReactiveValidationObject, IRen
             .WhenAnyValue(x => x.IsVisible)
             .Select(visible => visible);
 
-        Open = ReactiveCommand.Create(() => { }, canOpen);
-        Close = ReactiveCommand.Create(() => { }, canClose);
+        Open = ReactiveCommand.Create(() => { }, canOpen, outputScheduler: scheduler);
+        Close = ReactiveCommand.Create(() => { }, canClose, outputScheduler: scheduler);
 
         Open.Select(unit => true)
             .Merge(Close.Select(unit => false))
@@ -74,14 +76,14 @@ public sealed partial class RenameFileViewModel : ReactiveValidationObject, IRen
             .ThrownExceptions
             .Select(exception => true)
             .Merge(Close.Select(x => false))
-            .ToProperty(this, x => x.HasErrorMessage);
+            .ToProperty(this, x => x.HasErrorMessage, scheduler: scheduler);
 
         _errorMessage = Rename
             .ThrownExceptions
             .Select(exception => exception.Message)
             .Log(this, $"Rename file error occured in {provider.Name} for {OldName}")
             .Merge(Close.Select(x => string.Empty))
-            .ToProperty(this, x => x.ErrorMessage);
+            .ToProperty(this, x => x.ErrorMessage, scheduler: scheduler);
 
         NewName = state.NewName;
         this.WhenAnyValue(x => x.NewName)

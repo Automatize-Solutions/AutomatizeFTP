@@ -151,8 +151,7 @@ public sealed class MainViewModelTests
 
     private MainViewModel BuildMainViewModel()
     {
-        RxApp.MainThreadScheduler = Scheduler.Immediate;
-        RxApp.TaskpoolScheduler = Scheduler.Immediate;
+        var scheduler = ImmediateScheduler.Instance;
         return new MainViewModel(
             _state,
             new CloudFactory(),
@@ -162,6 +161,7 @@ public sealed class MainViewModelTests
                 entry.Created.Returns(provider.Created);
                 entry.Id.Returns(provider.Id);
                 return entry;
-            });
+            },
+            scheduler);
     }
 }

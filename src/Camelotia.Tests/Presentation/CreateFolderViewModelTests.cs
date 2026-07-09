@@ -128,8 +128,7 @@ public sealed class CreateFolderViewModelTests
 
     private CreateFolderViewModel BuildCreateFolderViewModel()
     {
-        RxApp.MainThreadScheduler = Scheduler.Immediate;
-        RxApp.TaskpoolScheduler = Scheduler.Immediate;
-        return new CreateFolderViewModel(_state, _model, _provider);
+        var scheduler = ImmediateScheduler.Instance;
+        return new CreateFolderViewModel(_state, _model, _provider, scheduler);
     }
 }

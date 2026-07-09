@@ -47,21 +47,23 @@ public sealed class IntegrationTests
 
     private IMainViewModel BuildMainViewModel()
     {
-        RxApp.MainThreadScheduler = Scheduler.Immediate;
-        RxApp.TaskpoolScheduler = Scheduler.Immediate;
+        var scheduler = ImmediateScheduler.Instance;
         return new MainViewModel(
             _state,
             new CloudFactory(),
             (state, provider) => new CloudViewModel(
                 state,
-                owner => new CreateFolderViewModel(state.CreateFolderState, owner, provider),
-                owner => new RenameFileViewModel(state.RenameFileState, owner, provider),
+                owner => new CreateFolderViewModel(state.CreateFolderState, owner, provider, scheduler),
+                owner => new RenameFileViewModel(state.RenameFileState, owner, provider, scheduler),
                 (file, owner) => new FileViewModel(owner, file),
                 (folder, owner) => new FolderViewModel(owner, folder),
                 new AuthViewModel(
-                    new HostAuthViewModel(state.AuthState.HostAuthState, provider),
-                    provider),
+                    new HostAuthViewModel(state.AuthState.HostAuthState, provider, scheduler),
+                    provider,
+                    scheduler),
                 _files,
-                provider));
+                provider,
+                scheduler),
+            scheduler);
     }
 }

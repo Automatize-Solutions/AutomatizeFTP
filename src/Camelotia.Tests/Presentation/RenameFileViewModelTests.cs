@@ -123,8 +123,7 @@ public sealed class RenameFileViewModelTests
 
     private RenameFileViewModel BuildRenameFileViewModel()
     {
-        RxApp.MainThreadScheduler = Scheduler.Immediate;
-        RxApp.TaskpoolScheduler = Scheduler.Immediate;
-        return new RenameFileViewModel(_state, _model, _provider);
+        var scheduler = ImmediateScheduler.Instance;
+        return new RenameFileViewModel(_state, _model, _provider, scheduler);
     }
 }

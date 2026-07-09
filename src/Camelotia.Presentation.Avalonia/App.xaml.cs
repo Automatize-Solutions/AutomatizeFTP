@@ -53,20 +53,24 @@ public class App : Application
     private static MainViewModel CreateViewModel(Window window)
     {
         var main = RxApp.SuspensionHost.GetAppState<MainState>();
+        var scheduler = AvaloniaScheduler.Instance;
         return new MainViewModel(
             main,
             new CloudFactory(),
             (state, provider) => new CloudViewModel(
                 state,
-                owner => new CreateFolderViewModel(state.CreateFolderState, owner, provider),
-                owner => new RenameFileViewModel(state.RenameFileState, owner, provider),
+                owner => new CreateFolderViewModel(state.CreateFolderState, owner, provider, scheduler),
+                owner => new RenameFileViewModel(state.RenameFileState, owner, provider, scheduler),
                 (file, owner) => new FileViewModel(owner, file),
                 (folder, owner) => new FolderViewModel(owner, folder),
                 new AuthViewModel(
-                    new HostAuthViewModel(state.AuthState.HostAuthState, provider),
-                    provider),
+                    new HostAuthViewModel(state.AuthState.HostAuthState, provider, scheduler),
+                    provider,
+                    scheduler),
                 new AvaloniaFileManager(window),
-                provider));
+                provider,
+                scheduler),
+            scheduler);
     }
 
     private static void AttachDevTools(TopLevel window)

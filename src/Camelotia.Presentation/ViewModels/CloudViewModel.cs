@@ -1,4 +1,5 @@
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
@@ -28,6 +29,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
     private readonly ObservableAsPropertyHelper<bool> _isLoading;
     private readonly ObservableAsPropertyHelper<bool> _canLogout;
     private readonly ObservableAsPropertyHelper<bool> _isReady;
+    private readonly IScheduler _scheduler;
     private readonly ICloud _cloud;
 
     public CloudViewModel(
@@ -38,8 +40,10 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
         FolderViewModelFactory folderFactory,
         IAuthViewModel auth,
         IFileManager files,
-        ICloud cloud)
+        ICloud cloud,
+        IScheduler scheduler)
     {
+        _scheduler = scheduler;
         _cloud = cloud;
         Folder = createFolderFactory(this);
         Rename = renameFactory(this);
@@ -52,7 +56,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
                 (folder, rename) => !folder && !rename);
 
         _canInteract = canInteract
-            .ToProperty(this, x => x.CanInteract);
+            .ToProperty(this, x => x.CanInteract, scheduler: _scheduler);
 
         var canRefresh = this
             .WhenAnyValue(
@@ -63,7 +67,8 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
         Refresh = ReactiveCommand.CreateFromTask(
             () => cloud.GetFiles(CurrentPath),
-            canRefresh);
+            canRefresh,
+            outputScheduler: _scheduler);
 
         _files = Refresh
             .Select(
@@ -73,17 +78,17 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
                     .ThenBy(file => file.Name)
                     .ToList())
             .Where(items => Files == null || !items.SequenceEqual(Files))
-            .ToProperty(this, x => x.Files);
+            .ToProperty(this, x => x.Files, scheduler: _scheduler);
 
         _isLoading = Refresh
             .IsExecuting
-            .ToProperty(this, x => x.IsLoading);
+            .ToProperty(this, x => x.IsLoading, scheduler: _scheduler);
 
         _isReady = Refresh
             .IsExecuting
             .Skip(1)
             .Select(executing => !executing)
-            .ToProperty(this, x => x.IsReady);
+            .ToProperty(this, x => x.IsReady, scheduler: _scheduler);
 
         var canOpenCurrentPath = this
             .WhenAnyValue(x => x.SelectedFile)
@@ -92,7 +97,8 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
         Open = ReactiveCommand.Create(
             () => Path.Combine(CurrentPath, SelectedFile.Name),
-            canOpenCurrentPath);
+            canOpenCurrentPath,
+            outputScheduler: _scheduler);
 
         // Back and CurrentPath are mutually dependent: this pipeline gates Back,
         // while the CurrentPath helper below is fed by Back. The helper therefore
@@ -110,9 +116,10 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
         Back = ReactiveCommand.Create(
             () => Path.GetDirectoryName(CurrentPath),
-            canCurrentPathGoBack);
+            canCurrentPathGoBack,
+            outputScheduler: _scheduler);
 
-        SetPath = ReactiveCommand.Create<string, string>(path => path);
+        SetPath = ReactiveCommand.Create<string, string>(path => path, outputScheduler: _scheduler);
 
         _currentPath = Open
             .Merge(Back)
@@ -120,27 +127,28 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .Select(path => path ?? cloud.InitialPath)
             .DistinctUntilChanged()
             .Log(this, $"Current path changed in {cloud.Name}")
-            .ToProperty(this, x => x.CurrentPath, initialPath);
+            .ToProperty(this, x => x.CurrentPath, initialPath, scheduler: _scheduler);
 
         var getBreadCrumbs = ReactiveCommand.CreateFromTask(
-            () => cloud.GetBreadCrumbs(CurrentPath));
+            () => cloud.GetBreadCrumbs(CurrentPath),
+            outputScheduler: _scheduler);
 
         _breadCrumbs = getBreadCrumbs
             .Where(items => items != null && items.Any())
             .Select(items => items.Select(folder => folderFactory(folder, this)))
-            .ToProperty(this, x => x.BreadCrumbs);
+            .ToProperty(this, x => x.BreadCrumbs, scheduler: _scheduler);
 
         _showBreadCrumbs = getBreadCrumbs
             .ThrownExceptions
             .Select(exception => false)
             .Merge(getBreadCrumbs.Select(items => items != null && items.Any()))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .ToProperty(this, x => x.ShowBreadCrumbs);
+            .ObserveOn(_scheduler)
+            .ToProperty(this, x => x.ShowBreadCrumbs, scheduler: _scheduler);
 
         _hideBreadCrumbs = this
             .WhenAnyValue(x => x.ShowBreadCrumbs)
             .Select(show => !show)
-            .ToProperty(this, x => x.HideBreadCrumbs);
+            .ToProperty(this, x => x.HideBreadCrumbs, scheduler: _scheduler);
 
         this.WhenAnyValue(x => x.CurrentPath, x => x.IsReady)
             .Where(x => x.Item1 != null && x.Item2)
@@ -160,14 +168,14 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .Skip(1)
             .Where(items => items != null)
             .Select(items => !items.Any())
-            .ToProperty(this, x => x.IsCurrentPathEmpty);
+            .ToProperty(this, x => x.IsCurrentPathEmpty, scheduler: _scheduler);
 
         _hasErrorMessage = Refresh
             .ThrownExceptions
             .Select(exception => true)
-            .ObserveOn(RxApp.MainThreadScheduler)
+            .ObserveOn(_scheduler)
             .Merge(Refresh.Select(x => false))
-            .ToProperty(this, x => x.HasErrorMessage);
+            .ToProperty(this, x => x.HasErrorMessage, scheduler: _scheduler);
 
         var canUploadToCurrentPath = this
             .WhenAnyValue(x => x.CurrentPath)
@@ -180,7 +188,8 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
                 .Where(response => response.Name != null && response.Stream != null)
                 .Select(args => _cloud.UploadFile(CurrentPath, args.Stream, args.Name))
                 .SelectMany(task => task.ToObservable()),
-            canUploadToCurrentPath);
+            canUploadToCurrentPath,
+            outputScheduler: _scheduler);
 
         UploadToCurrentPath.InvokeCommand(Refresh);
 
@@ -195,19 +204,20 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
                 .Where(stream => stream != null)
                 .Select(stream => _cloud.DownloadFile(SelectedFile.Path, stream))
                 .SelectMany(task => task.ToObservable()),
-            canDownloadSelectedFile);
+            canDownloadSelectedFile,
+            outputScheduler: _scheduler);
 
         var canLogout = cloud
             .IsAuthorized
             .DistinctUntilChanged()
             .Select(loggedIn => loggedIn && cloud.SupportsHostAuth)
             .CombineLatest(canInteract, (logout, interact) => logout && interact)
-            .ObserveOn(RxApp.MainThreadScheduler);
+            .ObserveOn(_scheduler);
 
-        Logout = ReactiveCommand.CreateFromTask(cloud.Logout, canLogout);
+        Logout = ReactiveCommand.CreateFromTask(cloud.Logout, canLogout, outputScheduler: _scheduler);
 
         _canLogout = canLogout
-            .ToProperty(this, x => x.CanLogout);
+            .ToProperty(this, x => x.CanLogout, scheduler: _scheduler);
 
         var canDeleteSelection = this
             .WhenAnyValue(x => x.SelectedFile)
@@ -216,7 +226,8 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
         DeleteSelectedFile = ReactiveCommand.CreateFromTask(
             () => cloud.Delete(SelectedFile.Path, SelectedFile.IsFolder),
-            canDeleteSelection);
+            canDeleteSelection,
+            outputScheduler: _scheduler);
 
         DeleteSelectedFile.InvokeCommand(Refresh);
 
@@ -227,7 +238,8 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
         UnselectFile = ReactiveCommand.Create(
             () => { SelectedFile = null; },
-            canUnselectFile);
+            canUnselectFile,
+            outputScheduler: _scheduler);
 
         UploadToCurrentPath.ThrownExceptions
             .Merge(DeleteSelectedFile.ThrownExceptions)
@@ -326,7 +338,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
         Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1))
             .Select(_ => RefreshingIn - 1)
             .Where(value => value >= 0)
-            .ObserveOn(RxApp.MainThreadScheduler)
+            .ObserveOn(_scheduler)
             .Subscribe(x => RefreshingIn = x)
             .DisposeWith(disposable);
 
@@ -340,7 +352,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
         Refresh.Select(_ => 30)
             .StartWith(30)
-            .ObserveOn(RxApp.MainThreadScheduler)
+            .ObserveOn(_scheduler)
             .Subscribe(x => RefreshingIn = x)
             .DisposeWith(disposable);
 

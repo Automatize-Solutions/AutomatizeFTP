@@ -135,8 +135,7 @@ public sealed class HostAuthViewModelTests
 
     private HostAuthViewModel BuildHostAuthViewModel()
     {
-        RxApp.MainThreadScheduler = Scheduler.Immediate;
-        RxApp.TaskpoolScheduler = Scheduler.Immediate;
-        return new HostAuthViewModel(_state, _provider);
+        var scheduler = ImmediateScheduler.Instance;
+        return new HostAuthViewModel(_state, _provider, scheduler);
     }
 }

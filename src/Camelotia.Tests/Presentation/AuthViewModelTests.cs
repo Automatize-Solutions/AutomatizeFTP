@@ -50,8 +50,7 @@ public sealed class AuthViewModelTests
 
     private AuthViewModel BuildAuthViewModel()
     {
-        RxApp.MainThreadScheduler = Scheduler.Immediate;
-        RxApp.TaskpoolScheduler = Scheduler.Immediate;
-        return new AuthViewModel(_host, _provider);
+        var scheduler = ImmediateScheduler.Instance;
+        return new AuthViewModel(_host, _provider, scheduler);
     }
 }
