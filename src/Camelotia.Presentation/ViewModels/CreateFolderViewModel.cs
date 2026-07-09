@@ -4,7 +4,7 @@ using Camelotia.Presentation.AppState;
 using Camelotia.Presentation.Interfaces;
 using Camelotia.Services.Interfaces;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 using ReactiveUI.Validation.Extensions;
 using ReactiveUI.Validation.Helpers;
 
@@ -12,7 +12,7 @@ namespace Camelotia.Presentation.ViewModels;
 
 public delegate ICreateFolderViewModel CreateFolderViewModelFactory(ICloudViewModel providerViewModel);
 
-public sealed class CreateFolderViewModel : ReactiveValidationObject, ICreateFolderViewModel
+public sealed partial class CreateFolderViewModel : ReactiveValidationObject, ICreateFolderViewModel
 {
     private readonly ObservableAsPropertyHelper<string> _errorMessage;
     private readonly ObservableAsPropertyHelper<bool> _hasErrorMessage;
@@ -92,10 +92,10 @@ public sealed class CreateFolderViewModel : ReactiveValidationObject, ICreateFol
     }
 
     [Reactive]
-    public string Name { get; set; }
+    public partial string Name { get; set; }
 
     [Reactive]
-    public bool IsVisible { get; set; }
+    public partial bool IsVisible { get; set; }
 
     public string ErrorMessage => _errorMessage.Value;
 

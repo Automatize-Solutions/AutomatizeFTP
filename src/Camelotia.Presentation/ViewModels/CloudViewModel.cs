@@ -9,13 +9,13 @@ using Camelotia.Presentation.Interfaces;
 using Camelotia.Services.Interfaces;
 using Camelotia.Services.Models;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 
 namespace Camelotia.Presentation.ViewModels;
 
 public delegate ICloudViewModel CloudViewModelFactory(CloudState state, ICloud provider);
 
-public sealed class CloudViewModel : ReactiveObject, ICloudViewModel, IActivatableViewModel
+public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IActivatableViewModel
 {
     private readonly ObservableAsPropertyHelper<IEnumerable<IFolderViewModel>> _breadCrumbs;
     private readonly ObservableAsPropertyHelper<IEnumerable<IFileViewModel>> _files;
@@ -252,10 +252,10 @@ public sealed class CloudViewModel : ReactiveObject, ICloudViewModel, IActivatab
     }
 
     [Reactive]
-    public int RefreshingIn { get; private set; }
+    public partial int RefreshingIn { get; private set; }
 
     [Reactive]
-    public IFileViewModel SelectedFile { get; set; }
+    public partial IFileViewModel SelectedFile { get; set; }
 
     public bool IsCurrentPathEmpty => _isCurrentPathEmpty.Value;
 

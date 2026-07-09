@@ -8,11 +8,11 @@ using Camelotia.Services.Models;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using ReactiveUI.SourceGenerators;
 
 namespace Camelotia.Presentation.ViewModels;
 
-public sealed class MainViewModel : ReactiveObject, IMainViewModel
+public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
 {
     private readonly ReadOnlyObservableCollection<ICloudViewModel> _providers;
     private readonly ObservableAsPropertyHelper<bool> _welcomeScreenCollapsed;
@@ -103,10 +103,10 @@ public sealed class MainViewModel : ReactiveObject, IMainViewModel
     }
 
     [Reactive]
-    public CloudType SelectedSupportedType { get; set; }
+    public partial CloudType SelectedSupportedType { get; set; }
 
     [Reactive]
-    public ICloudViewModel SelectedProvider { get; set; }
+    public partial ICloudViewModel SelectedProvider { get; set; }
 
     public ReactiveCommand<Unit, Unit> Unselect { get; }
 
