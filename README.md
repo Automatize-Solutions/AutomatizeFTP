@@ -1,45 +1,85 @@
-<p><img src="images/horizontal.png" alt="Camelotia" height="50px"></p>
+# AutomatizeFTP
 
-[![Build](https://github.com/reactiveui/Camelotia/actions/workflows/ci-build.yml/badge.svg)](https://github.com/reactiveui/Camelotia/actions/workflows/ci-build.yml) [![Pull Requests](https://img.shields.io/github/issues-pr/reactiveui/camelotia.svg)](https://github.com/reactiveui/Camelotia/pulls) [![Issues](https://img.shields.io/github/issues/reactiveui/camelotia.svg)](https://github.com/reactiveui/Camelotia/issues) ![License](https://img.shields.io/github/license/reactiveui/camelotia.svg) ![Size](https://img.shields.io/github/repo-size/reactiveui/camelotia.svg) [![codecov](https://codecov.io/gh/reactiveui/Camelotia/branch/main/graph/badge.svg?token=dmQeHH4Us8)](https://codecov.io/gh/reactiveui/Camelotia)
+A minimal, cross-platform **FTP / SFTP client** for desktop, built with
+[Avalonia](https://avaloniaui.net/) and [ReactiveUI](https://www.reactiveui.net/)
+on modern .NET. Runs on **macOS, Linux and Windows** from a single codebase.
 
-Camelotia is a sample cross-platform application built with reactive extensions, [ReactiveUI](https://github.com/reactiveui/ReactiveUI), and modern .NET UI frameworks. Camelotia is a file manager, it currently supports FTP, SFTP, and local file systems. The app runs on Windows, Linux and MacOS.
+The goal is deliberately narrow: a fast, no-nonsense file transfer client — the
+FileZilla-style workflow you actually use day to day (browse local + remote,
+upload/download, navigate, manage files) — without the weight of a general-purpose
+cloud file manager.
 
-### Compiling Avalonia app
+## Origin & credits
 
-<img src="images/UiAvalonia.png" width="550">
+AutomatizeFTP started as a derivative of
+[**Camelotia**](https://github.com/reactiveui/Camelotia) by
+[@worldbeater](https://github.com/worldbeater) and the ReactiveUI community.
 
-In order to compile .NET Standard libraries, run tests and run the <a href="https://github.com/avaloniaui">Avalonia</a> application on Windows, Linux or MacOS operating system make sure to have latest [.NET Core SDK](https://dot.net/) installed. Launch the `Camelotia.slnx` file to browse or to edit source files. Camelotia uses [Nuke Build](https://github.com/nuke-build/nuke) to build and test the solution. Execute the following commands to run the build scripts on Linux or MacOS:
+Camelotia is an **excellent** project. It's a genuinely well-architected,
+cross-platform sample that shows how to build reactive .NET desktop apps the right
+way — clean provider abstractions, ReactiveUI end to end, and a build/test setup
+that works across Windows, Linux and macOS. Much of the solid foundation this
+project stands on came straight from there, and it's worth studying on its own
+merits whether or not you care about FTP.
 
-```sh
-# Linux or MacOS shell. Launches the Avalonia app after build.
-git clone https://github.com/worldbeater/Camelotia
-cd ./Camelotia && bash ./build.sh --interactive
+- Upstream: **https://github.com/reactiveui/Camelotia**
+- This project: **https://github.com/Automatize-Solutions/AutomatizeFTP**
+
+Camelotia is MIT-licensed. The original `LICENSE` is preserved in this repository,
+and the full upstream history is kept intact in the Git log — no history rewrite,
+so you can trace exactly where each piece came from.
+
+## What's different from Camelotia
+
+Camelotia is a multi-provider cloud file manager (Google Drive, Yandex Disk, VK,
+GitHub, FTP, SFTP, local) targeting many UI heads (Avalonia, WPF, UWP, Xamarin).
+AutomatizeFTP strips that down to the essentials:
+
+- **Providers:** only **FTP**, **SFTP** and the **local file system** are kept.
+  All cloud providers and their SDK dependencies were removed.
+- **UI head:** only the **Avalonia** target is kept. The WPF, UWP and Xamarin
+  heads were dropped.
+- **Auth:** the OAuth flow was removed (no remaining provider needs it); FTP/SFTP
+  use direct host/credential authentication.
+- **Focus:** the UI is being reshaped from a "cloud storage manager" into a
+  purpose-built FTP/SFTP client.
+
+## Tech stack
+
+- **.NET** (modern SDK-style projects, single Avalonia solution)
+- **Avalonia UI** — cross-platform XAML UI framework
+- **ReactiveUI** — MVVM / reactive view models
+- **[FluentFTP](https://github.com/robinrodricks/FluentFTP)** — FTP / FTPS
+- **[SSH.NET](https://github.com/sshnet/SSH.NET)** — SFTP
+- **Newtonsoft.Json** — app-state persistence
+
+## Roadmap
+
+The work is proceeding in stages, deliberately kept separate:
+
+1. **Prune** — remove unused providers and UI heads, keep the solution building and
+   tests green. *(done)*
+2. **Stabilize** — fix outstanding test failures and any reactive-behavior drift
+   inherited from dependency upgrades, to reach a known-good baseline.
+3. **Rebrand** — rename the `Camelotia.*` projects, solution and namespaces to
+   `AutomatizeFtp.*` once the surface is minimal.
+4. **Reshape the UI** — turn the cloud-manager interface into a focused FTP/SFTP
+   client (dual-pane browsing, transfer progress, connection/site management).
+5. **Polish & package** — macOS-first packaging, then Linux and Windows.
+
+## Building
+
+Requires a recent .NET SDK.
+
+```bash
+dotnet build src/Camelotia.slnx
+dotnet test  src/Camelotia.slnx
 ```
 
-On Windows, execute the following command line:
+> Project and namespace names are still `Camelotia.*` at this stage; the rename to
+> `AutomatizeFtp.*` is a later roadmap step.
 
-```sh
-# Windows command line. Launches the Avalonia app after build.
-# Use the '--configuration Release' option to generate app packages.
-git clone https://github.com/worldbeater/Camelotia
-cd ./Camelotia && powershell -ExecutionPolicy Unrestricted ./build.ps1 --interactive
-```
+## License
 
-### Technologies and Tools Used
-
-- <a href="https://reactiveui.net/">ReactiveUI</a> modern MVVM framework
-- <a href="https://github.com/reactiveui/reactiveui.validation">ReactiveUI.Validation</a> reactive validation library
-- <a href="https://reactiveui.net/docs/handbook/events/">ReactiveUI.Events</a> turning regular events into observables
-- <a href="https://github.com/reactiveui/DynamicData">DynamicData</a> reactive collections
-- <a href="https://github.com/avaloniaui">AvaloniaUI</a> cross-platform XAML-based GUI framework
-- <a href="https://github.com/worldbeater/citrus.avalonia">Citrus.Avalonia</a> bright and modern AvaloniaUI theme
-- <a href="https://github.com/nuke-build/nuke">Nuke</a> build automation system for C#/.NET
-- <a href="https://github.com/xunit/xunit">XUnit</a> unit testing tool for .NET
-- <a href="https://github.com/tonerdo/coverlet">Coverlet</a> code coverage analyzer
-- <a href="https://github.com/nsubstitute/NSubstitute">NSubstitute</a> mocking library
-- <a href="https://github.com/fluentassertions/fluentassertions">FluentAssertions</a> assertions library
-- <a href="https://github.com/dotnet/reactive">Reactive Extensions</a> for .NET
-- <a href="https://github.com/robinrodricks/FluentFTP">FluentFTP</a> FTP implementation
-- <a href="https://github.com/sshnet/SSH.NET/">SSH.NET</a> SFTP implementation
-- <a href="https://www.jetbrains.com/rider/">JetBrains Rider</a> and <a href="https://visualstudio.microsoft.com/">Microsoft Visual Studio</a> IDEs
-- <a href="https://github.com/fornever/avaloniarider">AvaloniaRider</a> plugin for visual designer support
+MIT — see [`LICENSE`](./LICENSE). This project inherits Camelotia's MIT license and
+preserves the original copyright notice, as required.
