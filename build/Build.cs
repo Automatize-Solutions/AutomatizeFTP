@@ -1,13 +1,10 @@
-using System;
 using System.Linq;
 using Nuke.Common;
 using Nuke.Common.Execution;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 
 // ReSharper disable ArrangeTypeMemberModifiers
 
@@ -22,7 +19,6 @@ class Build : NukeBuild
 
     [Parameter] readonly string Configuration = "Release";
     [Parameter] readonly bool Interactive;
-    [Parameter] readonly bool Full;
 
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
@@ -57,115 +53,8 @@ class Build : NukeBuild
                     .SetProjectFile(path)
                     .SetConfiguration(Configuration))));
 
-    Target CompileUniversalWindowsApp => _ => _
-        .DependsOn(RunUnitTests)
-        .Executes(() =>
-        {
-            var execute = EnvironmentInfo.IsWin && Full;
-            Serilog.Log.Information($"Should compile for Universal Windows: {execute}");
-            if (!execute) return;
-
-            Serilog.Log.Information("Restoring packages required by UAP...");
-            var project = SourceDirectory.GlobFiles("**/*.Uwp.csproj").First();
-            MSBuild(settings => settings
-                .SetProjectFile(project)
-                .SetTargets("Restore"));
-            Serilog.Log.Information("Successfully restored UAP packages.");
-
-            new[] { MSBuildTargetPlatform.x86,
-                    MSBuildTargetPlatform.x64,
-                    MSBuildTargetPlatform.arm }
-                .ForEach(BuildApp);
-
-            void BuildApp(MSBuildTargetPlatform platform)
-            {
-                Serilog.Log.Information("Cleaning UAP project...");
-                MSBuild(settings => settings
-                    .SetProjectFile(project)
-                    .SetTargets("Clean"));
-                Serilog.Log.Information("Successfully managed to clean UAP project.");
-
-                Serilog.Log.Information($"Building UAP project for {platform}...");
-                MSBuild(settings => settings
-                    .SetProjectFile(project)
-                    .SetTargets("Build")
-                    .SetConfiguration(Configuration)
-                    .SetTargetPlatform(platform)
-                    .SetProperty("AppxPackageSigningEnabled", false)
-                    .SetProperty("AppxPackageDir", ArtifactsDirectory)
-                    .SetProperty("UapAppxPackageBuildMode", "CI")
-                    .SetProperty("AppxBundle", "Always"));
-                Serilog.Log.Information($"Successfully built UAP project for {platform}.");
-            }
-        });
-
-    Target CompileXamarinAndroidApp => _ => _
-        .DependsOn(RunUnitTests)
-        .Executes(() =>
-        {
-            var execute = EnvironmentInfo.IsWin && Full;
-            Serilog.Log.Information($"Should compile for Android: {execute}");
-            if (!execute) return;
-
-            Serilog.Log.Information("Restoring packages required by Xamarin Android...");
-            var project = SourceDirectory.GlobFiles("**/*.Xamarin.Droid.csproj").First();
-            MSBuild(settings => settings
-                .SetProjectFile(project)
-                .SetTargets("Restore"));
-            Serilog.Log.Information("Successfully restored Xamarin Android packages.");
-
-            Serilog.Log.Information("Building Xamarin Android project...");
-            var java = Environment.GetEnvironmentVariable("JAVA_HOME");
-            MSBuild(settings => settings
-                .SetProjectFile(project)
-                .SetTargets("Build")
-                .SetConfiguration(Configuration)
-                .SetProperty("JavaSdkDirectory", java));
-            Serilog.Log.Information("Successfully built Xamarin Android project.");
-
-            Serilog.Log.Information("Signing Android package...");
-            MSBuild(settings => settings
-                .SetProjectFile(project)
-                .SetTargets("SignAndroidPackage")
-                .SetConfiguration(Configuration)
-                .SetProperty("JavaSdkDirectory", java));
-            Serilog.Log.Information("Successfully signed Xamarin Android APK.");
-
-            Serilog.Log.Information("Moving APK files to artifacts directory...");
-            SourceDirectory
-                .GlobFiles("**/bin/**/*-Signed.apk")
-                .ForEach(file => file.MoveToDirectory(ArtifactsDirectory));
-            Serilog.Log.Information("Successfully moved APK files.");
-        });
-
-    Target CompileWindowsPresentationApp => _ => _
-        .DependsOn(RunUnitTests)
-        .Executes(() =>
-        {
-            var execute = EnvironmentInfo.IsWin && Full;
-            Serilog.Log.Information($"Should compile for WPF: {execute}");
-            if (!execute) return;
-
-            Serilog.Log.Information("Restoring packages required by WPF app...");
-            var project = SourceDirectory.GlobFiles("**/*.Wpf.csproj").First();
-            MSBuild(settings => settings
-                .SetProjectFile(project)
-                .SetTargets("Restore"));
-            Serilog.Log.Information("Successfully restored Wpf packages.");
-
-            Serilog.Log.Information("Building WPF project...");
-            MSBuild(settings => settings
-                .SetProjectFile(project)
-                .SetTargets("Build")
-                .SetConfiguration(Configuration));
-            Serilog.Log.Information("Successfully built WPF project.");
-        });
-
     Target RunInteractive => _ => _
         .DependsOn(CompileAvaloniaApp)
-        .DependsOn(CompileUniversalWindowsApp)
-        .DependsOn(CompileXamarinAndroidApp)
-        .DependsOn(CompileWindowsPresentationApp)
         .Executes(() => SourceDirectory
             .GlobFiles($"**/{InteractiveProjectName}.csproj")
             .Where(x => Interactive)
