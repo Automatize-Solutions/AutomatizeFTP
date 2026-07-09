@@ -1,0 +1,27 @@
+using System.Globalization;
+using AutomatizeFTP.Presentation.Interfaces;
+using ReactiveUI;
+
+namespace AutomatizeFTP.Presentation.DesignTime;
+
+public class DesignTimeFileViewModel(DesignTimeCloudViewModel provider) : ReactiveObject, IFileViewModel
+{
+    public DesignTimeFileViewModel()
+        : this(null)
+    {
+    }
+
+    public string Name { get; } = "Awesome file.";
+
+    public ICloudViewModel Provider { get; } = provider;
+
+    public string Modified { get; } = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+
+    public bool IsFolder { get; }
+
+    public bool IsFile { get; } = true;
+
+    public string Path { get; } = "/home/path/file";
+
+    public string Size { get; } = "42 KB";
+}

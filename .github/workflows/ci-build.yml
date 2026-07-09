@@ -7,16 +7,16 @@ on:
     branches: [ main ]
 
 env:
-  productNamespacePrefix: "Camelotia"
+  productNamespacePrefix: "AutomatizeFTP"
 
 jobs:
   build:
     uses: reactiveui/actions-common/.github/workflows/workflow-common-setup-and-build.yml@main
     with:
       configuration: Release
-      productNamespacePrefix: "Camelotia"
+      productNamespacePrefix: "AutomatizeFTP"
       useVisualStudioPreview: false
       useMauiCheckDotNetTool: false
       installWindowsSdk: false
       installWorkflows: false
-      solutionFile: 'Camelotia.slnx'
+      solutionFile: 'AutomatizeFTP.slnx'

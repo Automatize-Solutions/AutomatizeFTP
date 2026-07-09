@@ -12,7 +12,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 [UnsetVisualStudioEnvironmentVariables]
 class Build : NukeBuild
 {
-    const string InteractiveProjectName = "Camelotia.Presentation.Avalonia";
+    const string InteractiveProjectName = "AutomatizeFTP.Presentation.Avalonia";
     const string CoverageFileName = "coverage.cobertura.xml";
 
     public static int Main() => Execute<Build>(x => x.RunInteractive);

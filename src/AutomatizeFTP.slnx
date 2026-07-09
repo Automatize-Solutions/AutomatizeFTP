@@ -1,0 +1,16 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="../.editorconfig" />
+    <File Path="../.gitignore" />
+    <File Path="Directory.build.props" />
+    <File Path="stylecop.json" />
+  </Folder>
+  <Project Path="../build/build.csproj" />
+  <Project Path="AutomatizeFTP.Presentation.Avalonia/AutomatizeFTP.Presentation.Avalonia.csproj" />
+  <Project Path="AutomatizeFTP.Presentation/AutomatizeFTP.Presentation.csproj" />
+  <Project Path="AutomatizeFTP.Services/AutomatizeFTP.Services.csproj" />
+  <Project Path="AutomatizeFTP.Tests/AutomatizeFTP.Tests.csproj" />
+</Solution>

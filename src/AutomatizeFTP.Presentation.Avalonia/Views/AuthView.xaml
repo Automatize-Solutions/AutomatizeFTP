@@ -1,0 +1,8 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="AutomatizeFTP.Presentation.Avalonia.Views.AuthView"
+             xmlns:designTime="clr-namespace:AutomatizeFTP.Presentation.DesignTime;assembly=AutomatizeFTP.Presentation">
+    <Design.DataContext>
+        <designTime:DesignTimeAuthViewModel />
+    </Design.DataContext>
+</UserControl>

@@ -1,0 +1,30 @@
+using System.Reactive;
+using AutomatizeFTP.Presentation.Interfaces;
+using ReactiveUI;
+using ReactiveUI.Validation.Extensions;
+using ReactiveUI.Validation.Helpers;
+
+namespace AutomatizeFTP.Presentation.DesignTime;
+
+public class DesignTimeCreateFolderViewModel : ReactiveValidationObject, ICreateFolderViewModel
+{
+    public DesignTimeCreateFolderViewModel() => this.ValidationRule(x => x.Name, _ => false, "Validation error.");
+
+    public bool IsLoading { get; }
+
+    public bool IsVisible { get; set; }
+
+    public string Name { get; set; }
+
+    public string Path { get; } = "/home/path";
+
+    public bool HasErrorMessage { get; } = true;
+
+    public string ErrorMessage { get; } = "Error message example.";
+
+    public ReactiveCommand<Unit, Unit> Create { get; }
+
+    public ReactiveCommand<Unit, Unit> Close { get; }
+
+    public ReactiveCommand<Unit, Unit> Open { get; }
+}

@@ -1,0 +1,29 @@
+using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
+using AutomatizeFTP.Presentation.Interfaces;
+using ReactiveUI;
+using ReactiveUI.Avalonia;
+using ReactiveUI.Validation.Extensions;
+
+namespace AutomatizeFTP.Presentation.Avalonia.Views;
+
+public sealed partial class HostAuthView : ReactiveUserControl<IHostAuthViewModel>
+{
+    public HostAuthView()
+    {
+        InitializeComponent();
+        this.WhenActivated(disposables =>
+        {
+            this.BindValidation(ViewModel, x => x.Address, x => x.AddressValidation.Text)
+                .DisposeWith(disposables);
+            this.BindValidation(ViewModel, x => x.Port, x => x.PortValidation.Text)
+                .DisposeWith(disposables);
+            this.BindValidation(ViewModel, x => x.Username, x => x.UsernameValidation.Text)
+                .DisposeWith(disposables);
+            this.BindValidation(ViewModel, x => x.Password, x => x.PasswordValidation.Text)
+                .DisposeWith(disposables);
+            this.BindValidation(ViewModel, x => x.FormValidation.Text)
+                .DisposeWith(disposables);
+        });
+    }
+}

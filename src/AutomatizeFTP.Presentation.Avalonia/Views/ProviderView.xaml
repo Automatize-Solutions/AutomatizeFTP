@@ -1,0 +1,191 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:AutomatizeFTP.Presentation.Avalonia.Views"
+             xmlns:interfaces="clr-namespace:AutomatizeFTP.Presentation.Interfaces;assembly=AutomatizeFTP.Presentation"
+             xmlns:designTime="clr-namespace:AutomatizeFTP.Presentation.DesignTime;assembly=AutomatizeFTP.Presentation"
+             x:Class="AutomatizeFTP.Presentation.Avalonia.Views.ProviderView">
+    <Design.DataContext>
+        <designTime:DesignTimeCloudViewModel />
+    </Design.DataContext>
+    <UserControl.Styles>
+      <Style Selector="ListBox.BreadCrumb">
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden"/>
+        <Setter Property="Margin" Value="5"/>
+        <Setter Property="ItemsPanel">
+          <Setter.Value>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal"/>
+            </ItemsPanelTemplate>
+          </Setter.Value>
+        </Setter>
+        <Setter Property="ItemTemplate">
+          <Setter.Value>
+            <DataTemplate DataType="interfaces:IFolderViewModel">
+              <views:FolderView DataContext="{Binding}" />
+            </DataTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style Selector="ListBox.BreadCrumb > Border">
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Background" Value="{DynamicResource ThemeCardBrush}"/>
+      </Style>
+      <Style Selector="ListBox.BreadCrumb > ListBoxItem">
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="BorderThickness" Value="0"/>
+      </Style>
+    </UserControl.Styles>
+    <Grid>
+        <Grid RowDefinitions="Auto,*,Auto,Auto">
+            <Grid Grid.Row="0" Margin="5" ColumnDefinitions="Auto,*,Auto">
+                <Button Grid.Column="0"
+                        Command="{Binding Back}"
+                        ToolTip.Tip="Back"
+                        Classes="Primary">
+                <Image Height="16">
+                  <Image.Source>
+                    <DrawingImage Drawing="{DynamicResource ArrowUp}"/>
+                  </Image.Source>
+                </Image>
+              </Button>
+                <TextBlock Grid.Column="1"
+                           IsVisible="{Binding HideBreadCrumbs}"
+                           Text="{Binding CurrentPath}"
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           Margin="15 0" />
+                <ListBox Grid.Column="1"
+                         IsVisible="{Binding ShowBreadCrumbs}"
+                         ItemsSource="{Binding BreadCrumbs}"
+                         Classes="BreadCrumb"/>          
+                <Button Grid.Column="2"
+                        Command="{Binding Open}"
+                        HorizontalAlignment="Stretch"
+                        ToolTip.Tip="Open"
+                        Classes="Primary">
+                  <Image Height="16">
+                    <Image.Source>
+                      <DrawingImage Drawing="{DynamicResource ArrowDown}"/>
+                    </Image.Source>
+                  </Image>
+                </Button>
+            </Grid>
+            <Border Grid.Row="1" 
+                    BorderThickness="0 2 0 2"
+                    BorderBrush="{DynamicResource ThemeBorderLowBrush}">
+                <Grid>
+                    <ListBox Padding="0"
+                             Background="{DynamicResource ThemeCardBrush}"
+                             BorderThickness="0"
+                             SelectionMode="Toggle"
+                             ItemsSource="{Binding Files}"
+                             IsVisible="{Binding IsReady}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                             SelectedItem="{Binding SelectedFile, Mode=TwoWay}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="interfaces:IFileViewModel">
+                                <views:FileView DataContext="{Binding}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <Grid IsVisible="{Binding HasErrorMessage}" 
+                          Background="{DynamicResource ThemeCardBrush}">
+                        <StackPanel VerticalAlignment="Center">
+                            <Ellipse Width="10" Height="10"
+                                     HorizontalAlignment="Center"
+                                     Fill="#ff0000"
+                                     Margin="10" />
+                            <TextBlock HorizontalAlignment="Center"
+                                       Text="Can't perform the operation, an error has occured."/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid IsVisible="{Binding IsCurrentPathEmpty}" Background="{DynamicResource ThemeCardBrush}">
+                        <StackPanel VerticalAlignment="Center">
+                            <Ellipse Width="10" Height="10"
+                                     HorizontalAlignment="Center"
+                                     Fill="#ff0000"
+                                     Margin="10" />
+                            <TextBlock HorizontalAlignment="Center"
+                                       Text="Whoops, no files here!" />
+                        </StackPanel>
+                    </Grid>
+                    <Grid IsVisible="{Binding IsLoading}" 
+                          Background="{DynamicResource ThemeCardBrush}">
+                        <StackPanel VerticalAlignment="Center">
+                            <ProgressBar HorizontalAlignment="Stretch"
+                                         IsIndeterminate="{Binding IsLoading}" />
+                            <TextBlock HorizontalAlignment="Center"
+                                       Text="Please, wait..." />
+                        </StackPanel>
+                    </Grid>
+                    <Grid IsVisible="{Binding Folder.IsVisible}" 
+                          Background="{DynamicResource ThemeCardBrush}">
+                        <views:CreateFolderView DataContext="{Binding Folder}" />
+                    </Grid>
+                    <Grid IsVisible="{Binding Rename.IsVisible}" 
+                          Background="{DynamicResource ThemeCardBrush}">
+                        <views:RenameFileView DataContext="{Binding Rename}" />
+                    </Grid>
+                </Grid>
+            </Border>
+            <Grid Grid.Row="2" Margin="5 5 5 0" ColumnDefinitions="*,*,2*,*,*">
+                <Button Grid.Column="0"
+                        Content="Delete"
+                        Classes="Primary"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding DeleteSelectedFile}" />
+                <Button Grid.Column="1"
+                        Content="Rename"
+                        Classes="Primary"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding Rename.Open}"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" 
+                            Margin="5" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding SelectedFile.Name}"
+                               Opacity="0.5" />
+                </StackPanel>
+                <Button Grid.Column="3"
+                        Content="Upload"
+                        Classes="Primary"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding UploadToCurrentPath}" />
+                <Button Grid.Column="4"
+                        Content="Download"
+                        Classes="Primary"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding DownloadSelectedFile}" />
+            </Grid>
+            <Grid Grid.Row="3" Margin="5 0 5 5" ColumnDefinitions="*,*,2*,*,*">
+                <Button Grid.Column="0"
+                        Content="Logout"
+                        Classes="Primary"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding Logout}" />
+                <Button Grid.Column="1"
+                        Content="Unselect"
+                        Classes="Primary"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding UnselectFile}" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" 
+                            Margin="5" VerticalAlignment="Center">
+                    <TextBlock Text="Refreshing in: " />
+                    <TextBlock Text="{Binding RefreshingIn}" />
+                </StackPanel>
+                <Button Grid.Column="3" 
+                        Content="Create" 
+                        Classes="Primary"
+                        HorizontalAlignment="Stretch" 
+                        Command="{Binding Folder.Open}"/>
+                <Button Grid.Column="4"
+                        Content="Refresh"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding Refresh}" />
+            </Grid>
+        </Grid>
+        <Grid IsVisible="{Binding Auth.IsAnonymous}">
+            <views:AuthView DataContext="{Binding Auth}" />
+        </Grid>
+    </Grid>
+</UserControl>

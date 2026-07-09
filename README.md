@@ -60,9 +60,9 @@ The work is proceeding in stages, deliberately kept separate:
 1. **Prune** — remove unused providers and UI heads, keep the solution building and
    tests green. *(done)*
 2. **Stabilize** — fix outstanding test failures and any reactive-behavior drift
-   inherited from dependency upgrades, to reach a known-good baseline.
+   inherited from dependency upgrades, to reach a known-good baseline. *(done)*
 3. **Rebrand** — rename the `Camelotia.*` projects, solution and namespaces to
-   `AutomatizeFtp.*` once the surface is minimal.
+   `AutomatizeFTP.*` once the surface is minimal. *(done)*
 4. **Reshape the UI** — turn the cloud-manager interface into a focused FTP/SFTP
    client (dual-pane browsing, transfer progress, connection/site management).
 5. **Polish & package** — macOS-first packaging, then Linux and Windows.
@@ -72,12 +72,10 @@ The work is proceeding in stages, deliberately kept separate:
 Requires a recent .NET SDK.
 
 ```bash
-dotnet build src/Camelotia.slnx
-dotnet test  src/Camelotia.slnx
+dotnet build src/AutomatizeFTP.slnx
+dotnet test  src/AutomatizeFTP.slnx
+dotnet run --project src/AutomatizeFTP.Presentation.Avalonia
 ```
-
-> Project and namespace names are still `Camelotia.*` at this stage; the rename to
-> `AutomatizeFtp.*` is a later roadmap step.
 
 ## License
 
