@@ -1,9 +1,9 @@
 using System;
-using System.Reactive;
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
 using Camelotia.Presentation.AppState;
 using Camelotia.Presentation.Avalonia.Services;
 using Camelotia.Presentation.Avalonia.Views;
@@ -11,19 +11,29 @@ using Camelotia.Presentation.Infrastructure;
 using Camelotia.Presentation.ViewModels;
 using Camelotia.Services;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 
 namespace Camelotia.Presentation.Avalonia;
 
 public class App : Application
 {
+    private readonly NewtonsoftJsonSuspensionDriver _driver = new("appstate.json");
+    private MainState _state;
+
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
     public override void OnFrameworkInitializationCompleted()
     {
+        // ReactiveUI 23 seeds ISuspensionHost.AppState with Unit and only fills it in
+        // when it is null, so GetAppState<MainState>() can never succeed. Drive the
+        // suspension driver directly instead: it is the only thing we ever wanted.
+        _state = LoadState();
+
         var suspension = new AutoSuspendHelper(ApplicationLifetime);
-        RxApp.SuspensionHost.CreateNewAppState = () => new MainState();
-        RxApp.SuspensionHost.SetupDefaultSuspendResume(new NewtonsoftJsonSuspensionDriver("appstate.json"));
         suspension.OnFrameworkInitializationCompleted();
+
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            desktop.ShutdownRequested += (_, _) => _driver.SaveState(_state).Subscribe();
 
         var window = new Window
         {
@@ -37,7 +47,6 @@ public class App : Application
         window.Content = CreateView(window);
         window.Show();
 
-        RxApp.DefaultExceptionHandler = Observer.Create<Exception>(Console.WriteLine);
         base.OnFrameworkInitializationCompleted();
     }
 
@@ -50,9 +59,29 @@ public class App : Application
         return view;
     }
 
-    private static MainViewModel CreateViewModel(Window window)
+    private static void AttachDevTools(TopLevel window)
     {
-        var main = RxApp.SuspensionHost.GetAppState<MainState>();
+#if DEBUG
+        window.AttachDevTools();
+#endif
+    }
+
+    private MainState LoadState()
+    {
+        try
+        {
+            return (MainState)_driver.LoadState().Wait();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Could not restore app state, starting fresh: {exception.Message}");
+            return new MainState();
+        }
+    }
+
+    private MainViewModel CreateViewModel(Window window)
+    {
+        var main = _state;
         var scheduler = AvaloniaScheduler.Instance;
         return new MainViewModel(
             main,
@@ -71,12 +100,5 @@ public class App : Application
                 provider,
                 scheduler),
             scheduler);
-    }
-
-    private static void AttachDevTools(TopLevel window)
-    {
-#if DEBUG
-        window.AttachDevTools();
-#endif
     }
 }

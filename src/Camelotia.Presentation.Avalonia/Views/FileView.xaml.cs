@@ -3,10 +3,10 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
-using Avalonia.ReactiveUI;
 using Camelotia.Presentation.Interfaces;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 
 namespace Camelotia.Presentation.Avalonia.Views;
 

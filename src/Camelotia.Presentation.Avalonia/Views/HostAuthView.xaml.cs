@@ -1,8 +1,8 @@
 using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
-using Avalonia.ReactiveUI;
 using Camelotia.Presentation.Interfaces;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 using ReactiveUI.Validation.Extensions;
 
 namespace Camelotia.Presentation.Avalonia.Views;

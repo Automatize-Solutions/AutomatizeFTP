@@ -1,5 +1,6 @@
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Text.Json.Serialization.Metadata;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ReactiveUI;
@@ -23,19 +24,30 @@ public sealed class NewtonsoftJsonSuspensionDriver(string stateFilePath) : ISusp
         return Observable.Return(Unit.Default);
     }
 
-    public IObservable<object> LoadState()
+    public IObservable<object> LoadState() => Load<object>().Select(state => (object)state);
+
+    public IObservable<Unit> SaveState<T>(T state) => Save(state);
+
+    // ReactiveUI offers these overloads so an AOT-friendly driver can hand
+    // System.Text.Json its source-generated metadata. Newtonsoft resolves
+    // contracts at runtime and has no use for it.
+    public IObservable<T> LoadState<T>(JsonTypeInfo<T> typeInfo) => Load<T>();
+
+    public IObservable<Unit> SaveState<T>(T state, JsonTypeInfo<T> typeInfo) => Save(state);
+
+    private IObservable<T> Load<T>()
     {
         if (!File.Exists(stateFilePath))
         {
-            return Observable.Throw<object>(new FileNotFoundException(stateFilePath));
+            return Observable.Throw<T>(new FileNotFoundException(stateFilePath));
         }
 
         var lines = File.ReadAllText(stateFilePath);
-        var state = JsonConvert.DeserializeObject<object>(lines, _settings);
+        var state = JsonConvert.DeserializeObject<T>(lines, _settings);
         return Observable.Return(state);
     }
 
-    public IObservable<Unit> SaveState(object state)
+    private IObservable<Unit> Save<T>(T state)
     {
         var lines = JsonConvert.SerializeObject(state, Formatting.Indented, _settings);
         File.WriteAllText(stateFilePath, lines);

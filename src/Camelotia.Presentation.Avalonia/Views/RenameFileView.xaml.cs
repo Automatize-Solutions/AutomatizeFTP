@@ -1,6 +1,6 @@
-using Avalonia.ReactiveUI;
 using Camelotia.Presentation.Interfaces;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 
 namespace Camelotia.Presentation.Avalonia.Views;
 
