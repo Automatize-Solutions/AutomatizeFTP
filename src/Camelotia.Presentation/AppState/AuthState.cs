@@ -6,8 +6,5 @@ namespace Camelotia.Presentation.AppState;
 public class AuthState
 {
     [DataMember]
-    public DirectAuthState DirectAuthState { get; set; } = new();
-
-    [DataMember]
     public HostAuthState HostAuthState { get; set; } = new();
 }

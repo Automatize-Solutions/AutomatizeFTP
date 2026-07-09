@@ -11,15 +11,9 @@ public sealed class AuthViewModel : ReactiveObject, IAuthViewModel
     private readonly ObservableAsPropertyHelper<bool> _isAnonymous;
     private readonly ICloud _provider;
 
-    public AuthViewModel(
-        IDirectAuthViewModel direct,
-        IHostAuthViewModel host,
-        IOAuthViewModel open,
-        ICloud provider)
+    public AuthViewModel(IHostAuthViewModel host, ICloud provider)
     {
-        OAuth = open;
         HostAuth = host;
-        DirectAuth = direct;
         _provider = provider;
 
         _isAuthenticated = _provider
@@ -39,15 +33,7 @@ public sealed class AuthViewModel : ReactiveObject, IAuthViewModel
 
     public bool IsAuthenticated => _isAuthenticated.Value;
 
-    public bool SupportsDirectAuth => _provider.SupportsDirectAuth;
-
     public bool SupportsHostAuth => _provider.SupportsHostAuth;
 
-    public bool SupportsOAuth => _provider.SupportsOAuth;
-
-    public IDirectAuthViewModel DirectAuth { get; }
-
     public IHostAuthViewModel HostAuth { get; }
-
-    public IOAuthViewModel OAuth { get; }
 }

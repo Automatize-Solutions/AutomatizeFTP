@@ -73,7 +73,7 @@ public sealed class CloudViewModelTests
     {
         var authorized = new BehaviorSubject<bool>(true);
         _cloud.IsAuthorized.Returns(authorized);
-        _cloud.SupportsDirectAuth.Returns(true);
+        _cloud.SupportsHostAuth.Returns(true);
 
         var model = BuildProviderViewModel();
         model.Logout.CanExecute().Should().BeTrue();

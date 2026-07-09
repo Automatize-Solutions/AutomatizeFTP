@@ -26,8 +26,6 @@ public sealed class FtpCloudTests
         provider.Name.Should().Be("Ftp");
         provider.Id.Should().Be(_model.Id);
 
-        provider.SupportsDirectAuth.Should().BeFalse();
         provider.SupportsHostAuth.Should().BeTrue();
-        provider.SupportsOAuth.Should().BeFalse();
     }
 }

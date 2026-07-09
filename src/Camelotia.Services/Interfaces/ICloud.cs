@@ -28,11 +28,7 @@ public interface ICloud
 
     Task Delete(string path, bool isFolder);
 
-    Task DirectAuth(string login, string password);
-
     Task HostAuth(string address, int port, string login, string password);
-
-    Task OAuth();
 
     Task Logout();
 
@@ -42,9 +38,5 @@ public interface ICloud
 
     CloudParameters Parameters { get; }
 
-    bool SupportsDirectAuth { get; }
-
     bool SupportsHostAuth { get; }
-
-    bool SupportsOAuth { get; }
 }

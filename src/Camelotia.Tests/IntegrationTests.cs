@@ -59,9 +59,7 @@ public sealed class IntegrationTests
                 (file, owner) => new FileViewModel(owner, file),
                 (folder, owner) => new FolderViewModel(owner, folder),
                 new AuthViewModel(
-                    new DirectAuthViewModel(state.AuthState.DirectAuthState, provider),
                     new HostAuthViewModel(state.AuthState.HostAuthState, provider),
-                    new OAuthViewModel(provider),
                     provider),
                 _files,
                 provider));

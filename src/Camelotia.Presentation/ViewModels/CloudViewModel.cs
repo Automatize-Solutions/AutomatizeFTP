@@ -191,10 +191,7 @@ public sealed class CloudViewModel : ReactiveObject, ICloudViewModel, IActivatab
         var canLogout = cloud
             .IsAuthorized
             .DistinctUntilChanged()
-            .Select(loggedIn => loggedIn && (
-                cloud.SupportsDirectAuth ||
-                cloud.SupportsOAuth ||
-                cloud.SupportsHostAuth))
+            .Select(loggedIn => loggedIn && cloud.SupportsHostAuth)
             .CombineLatest(canInteract, (logout, interact) => logout && interact)
             .ObserveOn(RxApp.MainThreadScheduler);
 

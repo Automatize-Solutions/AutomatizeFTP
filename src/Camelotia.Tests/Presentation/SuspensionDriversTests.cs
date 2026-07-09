@@ -36,7 +36,7 @@ public class SuspensionDriversTests
         {
             AuthState = new AuthState
             {
-                DirectAuthState = new DirectAuthState
+                HostAuthState = new HostAuthState
                 {
                     Username = "Joseph Joestar",
                     Password = "Dio"
@@ -53,8 +53,8 @@ public class SuspensionDriversTests
         retyped.Clouds.Count.Should().Be(2);
         retyped.CloudStates.Should().NotBeEmpty();
         retyped.CloudStates.Should().Contain(provider =>
-            provider.AuthState.DirectAuthState.Username == "Joseph Joestar" &&
-            provider.AuthState.DirectAuthState.Password == "Dio");
+            provider.AuthState.HostAuthState.Username == "Joseph Joestar" &&
+            provider.AuthState.HostAuthState.Password == "Dio");
 
         await driver.InvalidateState();
         await Assert.ThrowsAnyAsync<Exception>(async () => await driver.LoadState()).ConfigureAwait(false);

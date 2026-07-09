@@ -31,17 +31,9 @@ public sealed class FtpCloud : ICloud
 
     public IObservable<bool> IsAuthorized => _isAuthorized;
 
-    public bool SupportsDirectAuth => false;
-
     public bool SupportsHostAuth => true;
 
-    public bool SupportsOAuth => false;
-
     public bool CanCreateFolder => true;
-
-    public Task OAuth() => Task.CompletedTask;
-
-    public Task DirectAuth(string login, string password) => Task.CompletedTask;
 
     public async Task HostAuth(string address, int port, string login, string password)
     {

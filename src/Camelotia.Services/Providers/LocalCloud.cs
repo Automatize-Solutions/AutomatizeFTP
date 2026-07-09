@@ -20,23 +20,15 @@ public sealed class LocalCloud : ICloud
 
     public IObservable<bool> IsAuthorized { get; } = Observable.Return(true);
 
-    public bool SupportsDirectAuth => false;
-
     public bool SupportsHostAuth => false;
-
-    public bool SupportsOAuth => false;
 
     public bool CanCreateFolder => true;
 
     public string InitialPath => string.Empty;
 
-    public Task OAuth() => Task.CompletedTask;
-
     public Task Logout() => Task.CompletedTask;
 
     public Task HostAuth(string address, int port, string login, string password) => Task.CompletedTask;
-
-    public Task DirectAuth(string login, string password) => Task.CompletedTask;
 
     public Task<IEnumerable<FileModel>> GetFiles(string path) => Task.Run(() =>
     {

@@ -29,8 +29,6 @@ public sealed class LocalCloudTests
         _provider.InitialPath.Should().Be(string.Empty);
 
         _provider.SupportsHostAuth.Should().BeFalse();
-        _provider.SupportsDirectAuth.Should().BeFalse();
-        _provider.SupportsOAuth.Should().BeFalse();
     }
 
     [Fact]
