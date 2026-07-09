@@ -9,9 +9,6 @@ public class CloudConfiguration
     public GitHubCloudOptions GitHub { get; set; } = new();
 
     [DataMember]
-    public GoogleDriveCloudOptions GoogleDrive { get; set; } = new();
-
-    [DataMember]
     public VkDocsCloudOptions VkDocs { get; set; } = new();
 
     [DataMember]

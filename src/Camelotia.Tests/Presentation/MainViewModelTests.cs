@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Reactive.Concurrency;
-using Akavache;
 using Camelotia.Presentation.AppState;
 using Camelotia.Presentation.Interfaces;
 using Camelotia.Presentation.ViewModels;
@@ -158,8 +157,7 @@ public sealed class MainViewModelTests
             _state,
             new CloudFactory(
                 _state.CloudConfiguration,
-                Substitute.For<IAuthenticator>(),
-                Substitute.For<IBlobCache>()),
+                Substitute.For<IAuthenticator>()),
             (state, provider) =>
             {
                 var entry = Substitute.For<ICloudViewModel>();

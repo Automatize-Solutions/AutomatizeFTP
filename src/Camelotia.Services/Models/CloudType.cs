@@ -4,7 +4,6 @@ public enum CloudType
 {
     Ftp,
     GitHub,
-    GoogleDrive,
     Local,
     Sftp,
     VkDocs,

@@ -1,5 +1,4 @@
 using System.Reactive.Concurrency;
-using Akavache;
 using Camelotia.Presentation.AppState;
 using Camelotia.Presentation.Interfaces;
 using Camelotia.Presentation.ViewModels;
@@ -17,7 +16,6 @@ namespace Camelotia.Tests;
 public sealed class IntegrationTests
 {
     private readonly IAuthenticator _authenticator = Substitute.For<IAuthenticator>();
-    private readonly IBlobCache _cache = Substitute.For<IBlobCache>();
     private readonly IFileManager _files = Substitute.For<IFileManager>();
     private readonly MainState _state = new();
 
@@ -54,7 +52,7 @@ public sealed class IntegrationTests
         RxApp.TaskpoolScheduler = Scheduler.Immediate;
         return new MainViewModel(
             _state,
-            new CloudFactory(_state.CloudConfiguration, _authenticator, _cache),
+            new CloudFactory(_state.CloudConfiguration, _authenticator),
             (state, provider) => new CloudViewModel(
                 state,
                 owner => new CreateFolderViewModel(state.CreateFolderState, owner, provider),

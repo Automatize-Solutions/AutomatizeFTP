@@ -58,8 +58,7 @@ public class App : Application
             main,
             new CloudFactory(
                 main.CloudConfiguration,
-                new AvaloniaYandexAuthenticator(),
-                Akavache.BlobCache.UserAccount),
+                new AvaloniaYandexAuthenticator()),
             (state, provider) => new CloudViewModel(
                 state,
                 owner => new CreateFolderViewModel(state.CreateFolderState, owner, provider),
