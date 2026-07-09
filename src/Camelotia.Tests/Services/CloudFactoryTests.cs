@@ -10,13 +10,12 @@ namespace Camelotia.Tests.Services;
 
 public sealed class CloudFactoryTests
 {
-    private readonly IAuthenticator _authenticator = Substitute.For<IAuthenticator>();
     private readonly MainState _state = new();
 
     [Fact]
     public void SupportedProviderTypesShouldNotBeEmpty()
     {
-        var factory = new CloudFactory(_state.CloudConfiguration, _authenticator);
+        var factory = new CloudFactory(_state.CloudConfiguration);
         factory.SupportedClouds.Should().NotBeEmpty();
         factory.SupportedClouds.Should().Contain(CloudType.Local);
         factory.SupportedClouds.Should().Contain(CloudType.Ftp);
@@ -25,7 +24,7 @@ public sealed class CloudFactoryTests
     [Fact]
     public void ShouldInstantiateSupportedProviders()
     {
-        var factory = new CloudFactory(_state.CloudConfiguration, _authenticator);
+        var factory = new CloudFactory(_state.CloudConfiguration);
         var provider = factory.CreateCloud(new CloudParameters { Type = CloudType.Local });
         provider.Should().NotBeNull();
         provider.Name.Should().Be(CloudType.Local.ToString());

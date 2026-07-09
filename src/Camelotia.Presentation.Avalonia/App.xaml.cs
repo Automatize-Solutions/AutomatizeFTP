@@ -56,9 +56,7 @@ public class App : Application
         var main = RxApp.SuspensionHost.GetAppState<MainState>();
         return new MainViewModel(
             main,
-            new CloudFactory(
-                main.CloudConfiguration,
-                new AvaloniaYandexAuthenticator()),
+            new CloudFactory(main.CloudConfiguration),
             (state, provider) => new CloudViewModel(
                 state,
                 owner => new CreateFolderViewModel(state.CreateFolderState, owner, provider),

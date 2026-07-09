@@ -4,6 +4,5 @@ public enum CloudType
 {
     Ftp,
     Local,
-    Sftp,
-    Yandex
+    Sftp
 }

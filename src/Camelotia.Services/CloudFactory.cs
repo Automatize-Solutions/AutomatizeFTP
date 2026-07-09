@@ -8,21 +8,17 @@ namespace Camelotia.Services;
 public sealed class CloudFactory : ICloudFactory
 {
     private readonly CloudConfiguration _configuration;
-    private readonly IAuthenticator _authenticator;
 
     public CloudFactory(
         CloudConfiguration configuration,
-        IAuthenticator authenticator,
         IReadOnlyCollection<CloudType> supported = null)
     {
         _configuration = configuration;
-        _authenticator = authenticator;
         SupportedClouds = supported ?? new[]
         {
             CloudType.Local,
             CloudType.Ftp,
-            CloudType.Sftp,
-            CloudType.Yandex
+            CloudType.Sftp
         };
     }
 
@@ -33,7 +29,6 @@ public sealed class CloudFactory : ICloudFactory
         CloudType.Ftp => new FtpCloud(parameters),
         CloudType.Local => new LocalCloud(parameters),
         CloudType.Sftp => new SftpCloud(parameters),
-        CloudType.Yandex => new YandexDiskCloud(parameters, _authenticator, _configuration.YandexDisk),
         _ => throw new ArgumentOutOfRangeException(nameof(parameters))
     };
 }
