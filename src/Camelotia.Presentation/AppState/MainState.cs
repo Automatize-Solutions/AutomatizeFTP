@@ -13,7 +13,10 @@ public class MainState
     [DataMember]
     public IEnumerable<CloudState> CloudStates
     {
-        get => [.. Clouds.Items];
+        // Materialize as an array: a collection expression yields the compiler's
+        // internal <>z__ReadOnlyArray, which TypeNameHandling.All persists as $type
+        // and Newtonsoft cannot construct when reading the state back.
+        get => Clouds.Items.ToArray();
         set => Clouds.AddOrUpdate(value);
     }
 
