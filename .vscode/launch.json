@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug AutomatizeFTP",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/AutomatizeFTP.Presentation.Avalonia/bin/Debug/net10.0/AutomatizeFTP.Presentation.Avalonia.dll",
+      "cwd": "${workspaceFolder}/src/AutomatizeFTP.Presentation.Avalonia",
+      "preLaunchTask": "build-debug",
+      "stopAtEntry": false,
+      "console": "integratedTerminal",
+      "env": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  ]
+}
