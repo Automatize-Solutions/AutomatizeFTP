@@ -3,7 +3,6 @@
   <x:String x:Key="AppTitle">AutomatizeFTP · Workspace FTP</x:String>
   <x:String x:Key="AppName">AutomatizeFTP</x:String>
   <x:String x:Key="AppSubtitle">WORKSPACE FTP</x:String>
-  <x:String x:Key="SecureSync">Sincronização segura</x:String>
   <x:String x:Key="Theme">☼  Tema</x:String>
   <x:String x:Key="LanguageButton">🌐  Inglês</x:String>
   <x:String x:Key="AddConnectionTooltip">Adicionar conexão</x:String>
@@ -12,8 +11,9 @@
   <x:String x:Key="WorkspaceText">Escolha uma conexão existente ou adicione um novo perfil para começar.</x:String>
   <x:String x:Key="AddConnection">＋  Adicionar conexão</x:String>
   <x:String x:Key="RemoveConnection">Remover conexão</x:String>
-  <x:String x:Key="WorkspaceLabel">WORKSPACE</x:String>
-  <x:String x:Key="SelectConnection">Selecione uma conexão FTP</x:String>
+  <x:String x:Key="WorkspaceLabel">CONEXÃO</x:String>
+  <x:String x:Key="SelectConnection">Selecione uma conexão salva</x:String>
+  <x:String x:Key="Protocol">Protocolo</x:String>
   <x:String x:Key="LocalFiles">Arquivos locais</x:String>
   <x:String x:Key="LocalFilesDescription">Este computador</x:String>
   <x:String x:Key="LocalComputer">Local</x:String>
@@ -41,6 +41,10 @@
   <x:String x:Key="ActiveTransfers">0 ativas</x:String>
   <x:String x:Key="TransferQueueHint">As transferências iniciadas aparecerão nesta fila.</x:String>
   <x:String x:Key="TransfersEmpty">As transferências iniciadas aparecerão aqui.</x:String>
+  <x:String x:Key="FailedTransfers">Transferências com falha</x:String>
+  <x:String x:Key="SuccessfulTransfers">Transferências concluídas</x:String>
+  <x:String x:Key="FailedTransfersEmpty">As transferências com falha aparecerão aqui.</x:String>
+  <x:String x:Key="SuccessfulTransfersEmpty">As transferências concluídas aparecerão aqui.</x:String>
   <x:String x:Key="Folder">Pasta</x:String>
   <x:String x:Key="File">Arquivo</x:String>
   <x:String x:Key="Open">Abrir</x:String>

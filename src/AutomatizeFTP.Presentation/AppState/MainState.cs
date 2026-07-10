@@ -31,4 +31,7 @@ public class MainState
 
     [DataMember]
     public string Theme { get; set; } = "Light";
+
+    [DataMember]
+    public string LocalPath { get; set; }
 }

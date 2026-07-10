@@ -27,10 +27,14 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
         ICloudFactory factory,
         CloudViewModelFactory createViewModel,
         IScheduler scheduler,
-        ICloudViewModel localProvider = null)
+        ICloudViewModel localProvider = null,
+        TransferQueue transferQueue = null)
     {
         _factory = factory;
         LocalProvider = localProvider;
+        TransferQueue = transferQueue ?? new TransferQueue();
+        LocalProvider?.WhenAnyValue(x => x.CurrentPath)
+            .Subscribe(path => state.LocalPath = path);
         Refresh = ReactiveCommand.Create(state.Clouds.Refresh, outputScheduler: scheduler);
 
         _isLoading = Refresh
@@ -131,7 +135,7 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
             async () =>
             {
                 var source = LocalProvider.SelectedFile;
-                await SelectedProvider.UploadFileFromAsync(source.Path, source.Name).ConfigureAwait(false);
+                await SelectedProvider.UploadFileFromAsync(source.Path, source.Name, source.IsFolder).ConfigureAwait(false);
                 SelectedProvider.Refresh.Execute().Subscribe();
             },
             canUpload,
@@ -152,7 +156,7 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
             async () =>
             {
                 var source = SelectedProvider.SelectedFile;
-                await LocalProvider.DownloadFileToAsync(source.Path, LocalProvider.CurrentPath, source.Name).ConfigureAwait(false);
+                await LocalProvider.DownloadFileToAsync(source.Path, LocalProvider.CurrentPath, source.Name, source.IsFolder).ConfigureAwait(false);
                 LocalProvider.Refresh.Execute().Subscribe();
             },
             canDownload,
@@ -180,6 +184,8 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
     public ReadOnlyObservableCollection<ICloudViewModel> Clouds => _providers;
 
     public ICloudViewModel LocalProvider { get; }
+
+    public TransferQueue TransferQueue { get; }
 
     public IEnumerable<CloudType> SupportedTypes => _factory.SupportedClouds;
 

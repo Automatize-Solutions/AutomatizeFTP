@@ -3,6 +3,9 @@
              xmlns:designTime="clr-namespace:AutomatizeFTP.Presentation.DesignTime;assembly=AutomatizeFTP.Presentation"
              x:Class="AutomatizeFTP.Presentation.Avalonia.Views.FileView"
              x:CompileBindings="False"
+             PointerPressed="OnPointerPressed"
+             PointerMoved="OnPointerMoved"
+             PointerReleased="OnPointerReleased"
              Background="Transparent">
     <Design.DataContext>
         <designTime:DesignTimeFileViewModel />

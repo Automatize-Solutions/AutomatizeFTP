@@ -3,7 +3,6 @@
   <x:String x:Key="AppTitle">AutomatizeFTP · FTP Workspace</x:String>
   <x:String x:Key="AppName">AutomatizeFTP</x:String>
   <x:String x:Key="AppSubtitle">FTP WORKSPACE</x:String>
-  <x:String x:Key="SecureSync">Secure synchronization</x:String>
   <x:String x:Key="Theme">☼  Theme</x:String>
   <x:String x:Key="LanguageButton">🌐  PT-BR</x:String>
   <x:String x:Key="AddConnectionTooltip">Add connection</x:String>
@@ -12,8 +11,9 @@
   <x:String x:Key="WorkspaceText">Choose an existing connection or add a new profile to get started.</x:String>
   <x:String x:Key="AddConnection">＋  Add connection</x:String>
   <x:String x:Key="RemoveConnection">Remove connection</x:String>
-  <x:String x:Key="WorkspaceLabel">WORKSPACE</x:String>
-  <x:String x:Key="SelectConnection">Select an FTP connection</x:String>
+  <x:String x:Key="WorkspaceLabel">CONNECTION</x:String>
+  <x:String x:Key="SelectConnection">Select a saved connection</x:String>
+  <x:String x:Key="Protocol">Protocol</x:String>
   <x:String x:Key="LocalFiles">Local files</x:String>
   <x:String x:Key="LocalFilesDescription">This computer</x:String>
   <x:String x:Key="LocalComputer">Local</x:String>
@@ -41,6 +41,10 @@
   <x:String x:Key="ActiveTransfers">0 active</x:String>
   <x:String x:Key="TransferQueueHint">Transfers started here will appear in this queue.</x:String>
   <x:String x:Key="TransfersEmpty">Started transfers will appear here.</x:String>
+  <x:String x:Key="FailedTransfers">Failed transfers</x:String>
+  <x:String x:Key="SuccessfulTransfers">Successful transfers</x:String>
+  <x:String x:Key="FailedTransfersEmpty">Failed transfers will appear here.</x:String>
+  <x:String x:Key="SuccessfulTransfersEmpty">Successful transfers will appear here.</x:String>
   <x:String x:Key="Folder">Folder</x:String>
   <x:String x:Key="File">File</x:String>
   <x:String x:Key="Open">Open</x:String>

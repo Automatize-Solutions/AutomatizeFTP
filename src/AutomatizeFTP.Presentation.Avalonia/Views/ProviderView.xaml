@@ -125,8 +125,8 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid>
-      <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
+    <Grid Margin="0,18,16,16">
+      <Grid RowDefinitions="Auto,Auto,*,Auto">
         <!-- Provider title -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="2,0,2,18">
             <StackPanel>
@@ -177,10 +177,11 @@
                     </Grid>
                 </Border>
                 <Grid Grid.Row="1">
-                    <ListBox Classes="files" Padding="0" ItemsSource="{Binding Files}"
+                    <ListBox x:Name="FilesList" Classes="files" Padding="0" ItemsSource="{Binding Files}"
                              ItemContainerTheme="{StaticResource FileItemTheme}"
                              IsVisible="{Binding IsReady}" ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                             SelectedItem="{Binding SelectedFile, Mode=TwoWay}">
+                             SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
+                             Focusable="True" PointerPressed="OnFilesPointerPressed" KeyDown="OnFilesKeyDown">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="interfaces:IFileViewModel">
                                 <views:FileView DataContext="{Binding}" />
@@ -199,7 +200,8 @@
                     <StackPanel IsVisible="{Binding HasErrorMessage}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="7">
                         <TextBlock Text="{DynamicResource LoadError}" FontSize="15" FontWeight="SemiBold"
                                    Foreground="{DynamicResource DangerBrush}" HorizontalAlignment="Center" />
-                        <TextBlock Text="{DynamicResource LoadErrorText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                        <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
+                                   MaxWidth="360" TextWrapping="Wrap" TextAlignment="Center" />
                     </StackPanel>
                     <Grid IsVisible="{Binding Folder.IsVisible}" Background="{DynamicResource SurfaceBrush}">
                         <views:CreateFolderView DataContext="{Binding Folder}" />
@@ -220,24 +222,6 @@
             <Button Grid.Column="3" Classes="action" Content="{DynamicResource Delete}" Command="{Binding DeleteSelectedFile}" Margin="8,0,0,0" />
         </Grid>
 
-        <!-- Transfer queue: intentionally empty until a transfer is running -->
-        <Border Grid.Row="4" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="9"
-                Padding="16,12" MinHeight="100">
-            <Grid RowDefinitions="Auto,*">
-                <Grid ColumnDefinitions="*,Auto">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{DynamicResource TransferQueue}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                        <Border Background="{DynamicResource AccentSurfaceBrush}" CornerRadius="9" Padding="7,2" Margin="8,0,0,0">
-                            <TextBlock Text="{DynamicResource ActiveTransfers}" Foreground="{DynamicResource AccentBrush}" FontSize="10" />
-                        </Border>
-                    </StackPanel>
-                    <TextBlock Grid.Column="1" Text="{DynamicResource TransferQueueHint}"
-                               Foreground="{DynamicResource TextMutedBrush}" FontSize="11" />
-                </Grid>
-                <TextBlock Grid.Row="1" Text="{DynamicResource TransfersEmpty}"
-                           Foreground="{DynamicResource TextMutedBrush}" FontSize="11" VerticalAlignment="Center" />
-            </Grid>
-        </Border>
       </Grid>
 
       <Grid IsVisible="{Binding Auth.IsAnonymous}" Background="{DynamicResource AppBackgroundBrush}">

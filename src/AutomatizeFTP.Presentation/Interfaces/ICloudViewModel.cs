@@ -39,9 +39,9 @@ public interface ICloudViewModel : INotifyPropertyChanged
 
     ReactiveCommand<string, string> SetPath { get; }
 
-    Task UploadFileFromAsync(string sourcePath, string name);
+    Task UploadFileFromAsync(string sourcePath, string name, bool isFolder);
 
-    Task DownloadFileToAsync(string sourcePath, string destinationPath, string name);
+    Task DownloadFileToAsync(string sourcePath, string destinationPath, string name, bool isFolder);
 
     bool IsCurrentPathEmpty { get; }
 
@@ -50,6 +50,10 @@ public interface ICloudViewModel : INotifyPropertyChanged
     bool IsReady { get; }
 
     bool HasErrorMessage { get; }
+
+    string ErrorMessage { get; }
+
+    void ReportError(Exception exception);
 
     bool CanLogout { get; }
 

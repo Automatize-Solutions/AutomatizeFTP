@@ -1,9 +1,11 @@
 using System;
+using System.IO;
 using System.Reactive.Linq;
 using AutomatizeFTP.Presentation.AppState;
 using AutomatizeFTP.Presentation.Avalonia.Services;
 using AutomatizeFTP.Presentation.Avalonia.Views;
 using AutomatizeFTP.Presentation.Infrastructure;
+using AutomatizeFTP.Presentation.Interfaces;
 using AutomatizeFTP.Presentation.ViewModels;
 using AutomatizeFTP.Services;
 using AutomatizeFTP.Services.Interfaces;
@@ -94,6 +96,8 @@ public class App : Application
         var main = _state;
         var scheduler = AvaloniaScheduler.Instance;
         var factory = new CloudFactory();
+        var transferQueue = new TransferQueue();
+        ICloudViewModel localProvider = null;
 
         CloudViewModel CreateCloudViewModel(CloudState state, ICloud provider) => new(
             state,
@@ -107,16 +111,44 @@ public class App : Application
                 scheduler),
             new AvaloniaFileManager(window),
             provider,
-            scheduler);
+            scheduler,
+            localProvider,
+            transferQueue);
 
-        var localState = new CloudState { Type = CloudType.Local };
-        var localProvider = CreateCloudViewModel(localState, factory.CreateCloud(localState.Parameters));
+        var localPath = ResolveLocalPath(_state.LocalPath);
+        _state.LocalPath = localPath;
+
+        var localState = new CloudState
+        {
+            Type = CloudType.Local,
+            CurrentPath = localPath
+        };
+        localProvider = CreateCloudViewModel(localState, factory.CreateCloud(localState.Parameters));
 
         return new MainViewModel(
             main,
             factory,
             CreateCloudViewModel,
             scheduler,
-            localProvider);
+            localProvider,
+            transferQueue);
+    }
+
+    private string ResolveLocalPath(string savedPath)
+    {
+        if (!string.IsNullOrWhiteSpace(savedPath) && Directory.Exists(savedPath))
+            return savedPath;
+
+        var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        if (!string.IsNullOrWhiteSpace(desktopPath))
+        {
+            Directory.CreateDirectory(desktopPath);
+            return desktopPath;
+        }
+
+        var userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return string.IsNullOrWhiteSpace(userProfilePath)
+            ? Directory.GetCurrentDirectory()
+            : userProfilePath;
     }
 }

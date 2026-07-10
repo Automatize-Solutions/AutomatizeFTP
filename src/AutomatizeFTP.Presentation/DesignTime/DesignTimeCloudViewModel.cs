@@ -47,9 +47,9 @@ public class DesignTimeCloudViewModel : ReactiveObject, ICloudViewModel
 
     public ReactiveCommand<string, string> SetPath { get; }
 
-    public Task UploadFileFromAsync(string sourcePath, string name) => Task.CompletedTask;
+    public Task UploadFileFromAsync(string sourcePath, string name, bool isFolder) => Task.CompletedTask;
 
-    public Task DownloadFileToAsync(string sourcePath, string destinationPath, string name) => Task.CompletedTask;
+    public Task DownloadFileToAsync(string sourcePath, string destinationPath, string name, bool isFolder) => Task.CompletedTask;
 
     public bool IsCurrentPathEmpty { get; }
 
@@ -58,6 +58,12 @@ public class DesignTimeCloudViewModel : ReactiveObject, ICloudViewModel
     public bool IsReady { get; } = true;
 
     public bool HasErrorMessage { get; }
+
+    public string ErrorMessage { get; }
+
+    public void ReportError(Exception exception)
+    {
+    }
 
     public bool CanLogout { get; }
 

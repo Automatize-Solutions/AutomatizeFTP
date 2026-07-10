@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reactive;
+using AutomatizeFTP.Presentation.ViewModels;
 using AutomatizeFTP.Services.Models;
 using ReactiveUI;
 
@@ -13,6 +14,8 @@ public interface IMainViewModel : INotifyPropertyChanged
     ICloudViewModel SelectedProvider { get; set; }
 
     ICloudViewModel LocalProvider { get; }
+
+    TransferQueue TransferQueue { get; }
 
     IEnumerable<CloudType> SupportedTypes { get; }
 

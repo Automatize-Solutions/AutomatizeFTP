@@ -22,7 +22,6 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
     private readonly ObservableAsPropertyHelper<IEnumerable<IFileViewModel>> _files;
     private readonly ObservableAsPropertyHelper<bool> _isCurrentPathEmpty;
     private readonly ObservableAsPropertyHelper<bool> _showBreadCrumbs;
-    private readonly ObservableAsPropertyHelper<bool> _hasErrorMessage;
     private readonly ObservableAsPropertyHelper<bool> _hideBreadCrumbs;
     private readonly ObservableAsPropertyHelper<string> _currentPath;
     private readonly ObservableAsPropertyHelper<bool> _canInteract;
@@ -31,6 +30,9 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
     private readonly ObservableAsPropertyHelper<bool> _isReady;
     private readonly IScheduler _scheduler;
     private readonly ICloud _cloud;
+    private readonly ICloudViewModel _localProvider;
+    private readonly TransferQueue _transferQueue;
+    private string _errorMessage;
 
     public CloudViewModel(
         CloudState state,
@@ -41,13 +43,18 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
         IAuthViewModel auth,
         IFileManager files,
         ICloud cloud,
-        IScheduler scheduler)
+        IScheduler scheduler,
+        ICloudViewModel localProvider = null,
+        TransferQueue transferQueue = null)
     {
         _scheduler = scheduler;
         _cloud = cloud;
+        _localProvider = localProvider;
+        _transferQueue = transferQueue;
         Folder = createFolderFactory(this);
         Rename = renameFactory(this);
         Auth = auth;
+        Auth.HostAuth.PropertyChanged += OnHostAuthPropertyChanged;
 
         var canInteract = this
             .WhenAnyValue(
@@ -178,12 +185,8 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .Select(items => !items.Any())
             .ToProperty(this, x => x.IsCurrentPathEmpty, scheduler: _scheduler);
 
-        _hasErrorMessage = Refresh
-            .ThrownExceptions
-            .Select(exception => true)
-            .ObserveOn(_scheduler)
-            .Merge(Refresh.Select(x => false))
-            .ToProperty(this, x => x.HasErrorMessage, scheduler: _scheduler);
+        Refresh.ThrownExceptions.Subscribe(ReportError);
+        Refresh.Subscribe(_ => ClearError());
 
         var canUploadToCurrentPath = this
             .WhenAnyValue(x => x.CurrentPath)
@@ -206,14 +209,32 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .Select(file => file?.IsFolder == false)
             .CombineLatest(Refresh.IsExecuting, canInteract, (down, loading, can) => down && !loading && can);
 
-        DownloadSelectedFile = ReactiveCommand.CreateFromObservable(
-            () => Observable
-                .FromAsync(() => files.OpenWrite(SelectedFile.Name))
-                .Where(stream => stream != null)
-                .Select(stream => _cloud.DownloadFile(SelectedFile.Path, stream))
-                .SelectMany(task => task.ToObservable()),
-            canDownloadSelectedFile,
-            outputScheduler: _scheduler);
+        if (_localProvider is not null)
+        {
+            canDownloadSelectedFile = canDownloadSelectedFile
+                .CombineLatest(
+                    _localProvider.WhenAnyValue(x => x.CurrentPath)
+                        .Select(path => !string.IsNullOrWhiteSpace(path)),
+                    (canDownload, hasDestination) => canDownload && hasDestination);
+        }
+
+        DownloadSelectedFile = _localProvider is null
+            ? ReactiveCommand.CreateFromObservable(
+                () => Observable
+                    .FromAsync(() => files.OpenWrite(SelectedFile.Name))
+                    .Where(stream => stream != null)
+                    .Select(stream => _cloud.DownloadFile(SelectedFile.Path, stream))
+                    .SelectMany(task => task.ToObservable()),
+                canDownloadSelectedFile,
+                outputScheduler: _scheduler)
+            : ReactiveCommand.CreateFromTask(
+                () => _localProvider.DownloadFileToAsync(
+                    SelectedFile.Path,
+                    _localProvider.CurrentPath,
+                    SelectedFile.Name,
+                    SelectedFile.IsFolder),
+                canDownloadSelectedFile,
+                outputScheduler: _scheduler);
 
         var canLogout = cloud
             .IsAuthorized
@@ -254,7 +275,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .Merge(DownloadSelectedFile.ThrownExceptions)
             .Merge(Refresh.ThrownExceptions)
             .Log(this, $"Exception occured in provider {cloud.Name}")
-            .Subscribe();
+            .Subscribe(ReportError);
 
         this.WhenAnyValue(x => x.CurrentPath)
             .Subscribe(path => state.CurrentPath = path);
@@ -289,7 +310,20 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     public bool IsLoading => _isLoading.Value;
 
-    public bool HasErrorMessage => _hasErrorMessage.Value;
+    public bool HasErrorMessage => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        private set
+        {
+            if (string.Equals(_errorMessage, value, StringComparison.Ordinal))
+                return;
+
+            this.RaiseAndSetIfChanged(ref _errorMessage, value);
+            this.RaisePropertyChanged(nameof(HasErrorMessage));
+        }
+    }
 
     public bool IsReady => _isReady.Value;
 
@@ -305,7 +339,15 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     public Guid Id => _cloud.Id;
 
-    public string Name => _cloud.Name;
+    public string Name => string.IsNullOrWhiteSpace(Auth.HostAuth.Address)
+        ? _cloud.Name
+        : Auth.HostAuth.Address;
+
+    private void OnHostAuthPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(IHostAuthViewModel.Address))
+            this.RaisePropertyChanged(nameof(Name));
+    }
 
     public DateTime Created => _cloud.Created;
 
@@ -331,18 +373,30 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     public ReactiveCommand<string, string> SetPath { get; }
 
-    public async Task UploadFileFromAsync(string sourcePath, string name)
+    public Task UploadFileFromAsync(string sourcePath, string name, bool isFolder)
     {
-        await using var stream = File.OpenRead(sourcePath);
-        await _cloud.UploadFile(CurrentPath, stream, name).ConfigureAwait(false);
+        var transfer = () => UploadFileFromCoreAsync(sourcePath, name, isFolder);
+        return _transferQueue is null
+            ? transfer()
+            : _transferQueue.RunAsync(name, "Uploading", sourcePath, CurrentPath, transfer);
     }
 
-    public async Task DownloadFileToAsync(string sourcePath, string destinationPath, string name)
+    public void ReportError(Exception exception)
     {
-        var targetPath = Path.Combine(destinationPath, name);
-        await using var stream = File.Create(targetPath);
-        await _cloud.DownloadFile(sourcePath, stream).ConfigureAwait(false);
+        if (exception is not null)
+            ErrorMessage = exception.Message;
     }
+
+    public Task DownloadFileToAsync(string sourcePath, string destinationPath, string name, bool isFolder)
+    {
+        var transfer = () => DownloadFileToCoreAsync(sourcePath, destinationPath, name, isFolder);
+        return _transferQueue is null
+            ? transfer()
+            : _transferQueue.RunAsync(name, "Downloading", sourcePath, destinationPath, transfer);
+    }
+
+    private static string CombineRemotePath(string path, string name) =>
+        $"{path.TrimEnd('/', '\\')}/{name.TrimStart('/', '\\')}";
 
     private static string NormalizeInitialPath(string path, ICloud cloud)
     {
@@ -355,6 +409,79 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
         return normalized;
     }
+
+    private async Task UploadFileFromCoreAsync(string sourcePath, string name, bool isFolder)
+    {
+        if (isFolder)
+        {
+            await UploadDirectoryAsync(sourcePath, CurrentPath, name).ConfigureAwait(false);
+            return;
+        }
+
+        await using var stream = File.OpenRead(sourcePath);
+        await _cloud.UploadFile(CurrentPath, stream, name).ConfigureAwait(false);
+    }
+
+    private async Task DownloadFileToCoreAsync(
+        string sourcePath,
+        string destinationPath,
+        string name,
+        bool isFolder)
+    {
+        if (isFolder)
+        {
+            await DownloadDirectoryAsync(sourcePath, destinationPath, name).ConfigureAwait(false);
+            return;
+        }
+
+        var targetPath = Path.Combine(destinationPath, name);
+        await using var stream = File.Create(targetPath);
+        await _cloud.DownloadFile(sourcePath, stream).ConfigureAwait(false);
+    }
+
+    private async Task UploadDirectoryAsync(string sourcePath, string destinationPath, string name)
+    {
+        var existingFolder = (await _cloud.GetFiles(destinationPath).ConfigureAwait(false))
+            .FirstOrDefault(file => file.IsFolder &&
+                                    string.Equals(file.Name, name, StringComparison.OrdinalIgnoreCase));
+        var remotePath = existingFolder?.Path ?? CombineRemotePath(destinationPath, name);
+        if (existingFolder is null)
+            await _cloud.CreateFolder(destinationPath, name).ConfigureAwait(false);
+
+        foreach (var directory in Directory.EnumerateDirectories(sourcePath))
+        {
+            await UploadDirectoryAsync(directory, remotePath, Path.GetFileName(directory))
+                .ConfigureAwait(false);
+        }
+
+        foreach (var file in Directory.EnumerateFiles(sourcePath))
+        {
+            await using var stream = File.OpenRead(file);
+            await _cloud.UploadFile(remotePath, stream, Path.GetFileName(file)).ConfigureAwait(false);
+        }
+    }
+
+    private async Task DownloadDirectoryAsync(string sourcePath, string destinationPath, string name)
+    {
+        var localPath = Path.Combine(destinationPath, name);
+        Directory.CreateDirectory(localPath);
+
+        var files = await _cloud.GetFiles(sourcePath).ConfigureAwait(false);
+        foreach (var file in files)
+        {
+            if (file.IsFolder)
+            {
+                await DownloadDirectoryAsync(file.Path, localPath, file.Name).ConfigureAwait(false);
+                continue;
+            }
+
+            var targetPath = Path.Combine(localPath, file.Name);
+            await using var stream = File.Create(targetPath);
+            await _cloud.DownloadFile(file.Path, stream).ConfigureAwait(false);
+        }
+    }
+
+    private void ClearError() => ErrorMessage = string.Empty;
 
     private IEnumerable<IFolderViewModel> CreatePathBreadCrumbs(
         string path,

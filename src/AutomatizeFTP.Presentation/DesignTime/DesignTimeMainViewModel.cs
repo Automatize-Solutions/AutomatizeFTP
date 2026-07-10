@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
 using AutomatizeFTP.Presentation.Interfaces;
+using AutomatizeFTP.Presentation.ViewModels;
 using AutomatizeFTP.Services.Models;
 using ReactiveUI;
 
@@ -19,6 +20,8 @@ public class DesignTimeMainViewModel : ReactiveObject, IMainViewModel
     public ICloudViewModel SelectedProvider { get; set; } = new DesignTimeCloudViewModel();
 
     public ICloudViewModel LocalProvider { get; } = new DesignTimeCloudViewModel();
+
+    public TransferQueue TransferQueue { get; } = new();
 
     public IEnumerable<CloudType> SupportedTypes { get; } = [CloudType.Ftp, CloudType.Sftp];
 
