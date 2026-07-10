@@ -7,12 +7,16 @@ namespace AutomatizeFTP.Presentation.Avalonia.Views;
 
 internal sealed record FileDragPayload(
     ICloudViewModel SourceProvider,
-    string Path,
-    string Name,
-    bool IsFolder)
+    IReadOnlyList<FileDragItem> Items)
 {
     private const string TokenPrefix = "automatizeftp-file:";
     private static readonly ConcurrentDictionary<string, FileDragPayload> ActivePayloads = new();
+
+    public string Path => Items[0].Path;
+
+    public string Name => Items[0].Name;
+
+    public bool IsFolder => Items[0].IsFolder;
 
     public static string Register(FileDragPayload payload)
     {
@@ -47,3 +51,5 @@ internal sealed record FileDragPayload(
             ActivePayloads.TryRemove(token[TokenPrefix.Length..], out _);
     }
 }
+
+internal sealed record FileDragItem(string Path, string Name, bool IsFolder);

@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:views="clr-namespace:AutomatizeFTP.Presentation.Avalonia.Views"
+             xmlns:controls="clr-namespace:AutomatizeFTP.Presentation.Avalonia.Controls"
              xmlns:interfaces="clr-namespace:AutomatizeFTP.Presentation.Interfaces;assembly=AutomatizeFTP.Presentation"
              xmlns:designTime="clr-namespace:AutomatizeFTP.Presentation.DesignTime;assembly=AutomatizeFTP.Presentation"
              x:Class="AutomatizeFTP.Presentation.Avalonia.Views.ProviderView"
@@ -126,7 +127,7 @@
     </UserControl.Styles>
 
     <Grid Margin="0,18,16,16">
-      <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <Grid RowDefinitions="Auto,Auto,*">
         <!-- Provider title -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="2,0,2,18">
             <StackPanel>
@@ -177,18 +178,16 @@
                     </Grid>
                 </Border>
                 <Grid Grid.Row="1">
-                    <ListBox x:Name="FilesList" Classes="files" Padding="0" ItemsSource="{Binding Files}"
+                    <controls:FileExplorerListBox x:Name="FilesList" Classes="files" Padding="0" ItemsSource="{Binding Files}"
                              ItemContainerTheme="{StaticResource FileItemTheme}"
                              IsVisible="{Binding IsReady}" ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                             SelectionMode="Multiple" SelectionChanged="OnFilesSelectionChanged"
-                             Focusable="True" PointerPressed="OnFilesPointerPressed" PointerMoved="OnFilesPointerMoved"
-                             PointerReleased="OnFilesPointerReleased" KeyDown="OnFilesKeyDown">
+                             SelectionMode="Multiple" Focusable="True">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="interfaces:IFileViewModel">
                                 <views:FileView DataContext="{Binding}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
-                    </ListBox>
+                    </controls:FileExplorerListBox>
                     <StackPanel IsVisible="{Binding IsLoading}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
                         <ProgressBar Width="220" IsIndeterminate="True" />
                         <TextBlock Text="{DynamicResource LoadingFiles}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
@@ -213,15 +212,6 @@
                 </Grid>
             </Grid>
         </Border>
-
-        <!-- Actions -->
-        <Grid Grid.Row="3" ColumnDefinitions="Auto,Auto,*,Auto" Margin="0,12,0,12">
-            <Button Grid.Column="0" Classes="action" Content="{DynamicResource NewFolder}" Command="{Binding Folder.Open}" />
-            <Button Grid.Column="1" Classes="action" Content="{DynamicResource Rename}" Command="{Binding Rename.Open}" Margin="8,0,0,0" />
-            <TextBlock Grid.Column="2" Text="{Binding SelectedFile.Name}" Foreground="{DynamicResource TextSecondaryBrush}"
-                       VerticalAlignment="Center" Margin="14,0" TextTrimming="CharacterEllipsis" />
-            <Button Grid.Column="3" Classes="action" Content="{DynamicResource Delete}" Command="{Binding DeleteSelectedFile}" Margin="8,0,0,0" />
-        </Grid>
 
       </Grid>
 

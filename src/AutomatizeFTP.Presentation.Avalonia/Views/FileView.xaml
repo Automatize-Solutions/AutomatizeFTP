@@ -3,9 +3,6 @@
              xmlns:designTime="clr-namespace:AutomatizeFTP.Presentation.DesignTime;assembly=AutomatizeFTP.Presentation"
              x:Class="AutomatizeFTP.Presentation.Avalonia.Views.FileView"
              x:CompileBindings="False"
-             PointerPressed="OnPointerPressed"
-             PointerMoved="OnPointerMoved"
-             PointerReleased="OnPointerReleased"
              Background="Transparent">
     <Design.DataContext>
         <designTime:DesignTimeFileViewModel />
@@ -14,7 +11,11 @@
         <ContextMenu>
             <MenuItem Header="{DynamicResource Open}" Command="{Binding Provider.Open}" />
             <MenuItem Header="{DynamicResource Download}" Command="{Binding Provider.DownloadSelectedFile}" />
+            <Separator />
+            <MenuItem Header="{DynamicResource NewFolder}" Command="{Binding Provider.Folder.Open}" />
             <MenuItem Header="{DynamicResource Rename}" Command="{Binding Provider.Rename.Open}" />
+            <MenuItem Header="{DynamicResource Delete}" Command="{Binding Provider.DeleteSelectedFile}" />
+            <Separator />
             <MenuItem Header="{DynamicResource Unselect}" Command="{Binding Provider.UnselectFile}" />
         </ContextMenu>
     </UserControl.ContextMenu>
