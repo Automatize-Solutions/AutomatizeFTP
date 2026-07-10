@@ -5,6 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ApplicationIcon>Assets/icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +26,12 @@
          the XAML compiler, so the build passed, but nothing shipped the compiled
          XAML and the app died at Initialize(). -->
     <AvaloniaResource Include="**\*.xaml" />
+    <!-- Runtime window icon: PNG because Skia decodes it on every platform;
+         the .ico above only feeds the Win32 resource of the executable. -->
+    <AvaloniaResource Include="Assets\icon-256.png" />
+    <!-- Loose file, not AvaloniaResource: NSImage reads it straight from disk
+         to set the macOS dock icon when running outside an .app bundle. -->
+    <Content Include="Assets\icon.icns" CopyToOutputDirectory="PreserveNewest" />
     <Compile Update="**\*.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>

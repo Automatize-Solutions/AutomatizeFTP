@@ -16,6 +16,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using Avalonia.Platform;
 using Avalonia.Styling;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
@@ -44,6 +45,7 @@ public class App : Application
         var window = new Window
         {
             Title = "AutomatizeFTP · FTP Workspace",
+            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://AutomatizeFTP.Presentation.Avalonia/Assets/icon-256.png"))),
             Height = 820,
             Width = 1400,
             MinHeight = 680,
@@ -52,6 +54,8 @@ public class App : Application
 
         window.Content = CreateView(window);
         window.Show();
+
+        MacDockIcon.TrySet(Path.Combine(AppContext.BaseDirectory, "Assets", "icon.icns"));
 
         base.OnFrameworkInitializationCompleted();
     }
