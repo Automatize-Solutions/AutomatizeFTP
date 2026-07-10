@@ -1,3 +1,6 @@
+[![Release](https://github.com/Automatize-Solutions/AutomatizeFTP/actions/workflows/release.yml/badge.svg)](https://github.com/Automatize-Solutions/AutomatizeFTP/actions/workflows/release.yml)
+
+
 # AutomatizeFTP
 
 A minimal, cross-platform **FTP / SFTP client** for desktop, built with
