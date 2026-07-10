@@ -208,16 +208,19 @@
                 <TabItem Header="{DynamicResource TransferQueue}">
                     <Grid RowDefinitions="Auto,*" Margin="16,12">
                         <Grid ColumnDefinitions="*,Auto">
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="{DynamicResource TransferQueue}" FontSize="13" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <Border Background="{DynamicResource AccentSurfaceBrush}" CornerRadius="9" Padding="7,2" Margin="8,0,0,0">
-                                    <TextBlock Text="{Binding TransferQueue.ActiveCount}" Foreground="{DynamicResource AccentBrush}" FontSize="10" />
+                                           Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                <Border Background="{DynamicResource AccentSurfaceBrush}" CornerRadius="10"
+                                        Height="20" MinWidth="20" Padding="5,0" Margin="8,0,0,0"
+                                        HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding TransferQueue.ActiveCount}"
+                                               Foreground="{DynamicResource AccentBrush}" FontSize="10"
+                                               FontWeight="SemiBold" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
                                 </Border>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                                <TextBlock Text="{DynamicResource TransferQueueHint}"
-                                           Foreground="{DynamicResource TextMutedBrush}" FontSize="11" VerticalAlignment="Center" />
                                 <Button x:Name="ClearTransferQueueButton" Content="{DynamicResource ClearTransferQueue}"
                                     Classes="queueClear" IsEnabled="{Binding TransferQueue.HasItems}" />
                             </StackPanel>
