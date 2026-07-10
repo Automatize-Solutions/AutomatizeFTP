@@ -5,7 +5,7 @@
   <Folder Name="/Solution Items/">
     <File Path="../.editorconfig" />
     <File Path="../.gitignore" />
-    <File Path="Directory.build.props" />
+    <File Path="Directory.Build.props" />
     <File Path="stylecop.json" />
   </Folder>
   <Project Path="AutomatizeFTP.Presentation.Avalonia/AutomatizeFTP.Presentation.Avalonia.csproj" />
