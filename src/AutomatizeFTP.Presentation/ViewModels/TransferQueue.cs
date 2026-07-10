@@ -25,12 +25,14 @@ public sealed class TransferQueue : ReactiveObject
 
     public bool HasNoCompletedItems => !HasCompletedItems;
 
+    public bool HasItems => HasActiveItems || HasFailedItems || HasCompletedItems;
+
     public async Task RunAsync(
         string name,
         string operation,
         string source,
         string destination,
-        Func<Task> transfer)
+        Func<CancellationToken, IProgress<double>, Task> transfer)
     {
         var item = new TransferQueueItem(name, operation, source, destination);
         Active.Add(item);
@@ -38,10 +40,17 @@ public sealed class TransferQueue : ReactiveObject
 
         try
         {
-            await transfer();
+            var progress = new Progress<double>(item.ReportProgress);
+            await transfer(item.CancellationToken, progress);
+            item.CancellationToken.ThrowIfCancellationRequested();
             item.Complete();
             Active.Remove(item);
             Completed.Insert(0, item);
+        }
+        catch (OperationCanceledException) when (item.IsCancellationRequested)
+        {
+            item.Cancelled();
+            Active.Remove(item);
         }
         catch (Exception exception)
         {
@@ -53,7 +62,22 @@ public sealed class TransferQueue : ReactiveObject
         finally
         {
             RaiseActiveStateChanged();
+            item.Finish();
+            item.Dispose();
         }
+    }
+
+    public async Task ClearAsync()
+    {
+        var activeItems = Active.ToArray();
+        foreach (var item in activeItems)
+            item.Cancel();
+
+        await Task.WhenAll(activeItems.Select(item => item.Completion));
+        Active.Clear();
+        Failed.Clear();
+        Completed.Clear();
+        RaiseActiveStateChanged();
     }
 
     private void RaiseActiveStateChanged()
@@ -65,13 +89,17 @@ public sealed class TransferQueue : ReactiveObject
         this.RaisePropertyChanged(nameof(HasNoFailedItems));
         this.RaisePropertyChanged(nameof(HasCompletedItems));
         this.RaisePropertyChanged(nameof(HasNoCompletedItems));
+        this.RaisePropertyChanged(nameof(HasItems));
     }
 }
 
-public sealed class TransferQueueItem : ReactiveObject
+public sealed class TransferQueueItem : ReactiveObject, IDisposable
 {
+    private readonly CancellationTokenSource _cancellation = new();
+    private readonly TaskCompletionSource _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private string _status;
     private string _errorMessage;
+    private double _progress;
 
     internal TransferQueueItem(string name, string operation, string source, string destination)
     {
@@ -90,6 +118,18 @@ public sealed class TransferQueueItem : ReactiveObject
 
     public string Destination { get; }
 
+    public CancellationToken CancellationToken => _cancellation.Token;
+
+    public bool IsCancellationRequested => _cancellation.IsCancellationRequested;
+
+    public Task Completion => _completion.Task;
+
+    public double Progress
+    {
+        get => _progress;
+        private set => this.RaiseAndSetIfChanged(ref _progress, Math.Clamp(value, 0, 100));
+    }
+
     public string Status
     {
         get => _status;
@@ -102,7 +142,21 @@ public sealed class TransferQueueItem : ReactiveObject
         private set => this.RaiseAndSetIfChanged(ref _errorMessage, value);
     }
 
+    public void Dispose() => _cancellation.Dispose();
+
     internal void Complete() => Status = "Completed";
+
+    internal void ReportProgress(double progress) => Progress = progress;
+
+    internal void Cancel()
+    {
+        if (!IsCancellationRequested)
+            _cancellation.Cancel();
+    }
+
+    internal void Cancelled() => Status = "Cancelled";
+
+    internal void Finish() => _completion.TrySetResult();
 
     internal void Fail(Exception exception)
     {

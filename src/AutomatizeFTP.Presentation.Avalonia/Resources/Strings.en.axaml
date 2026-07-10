@@ -38,6 +38,16 @@
   <x:String x:Key="Upload">↑  Upload</x:String>
   <x:String x:Key="Delete">Delete</x:String>
   <x:String x:Key="TransferQueue">Transfer queue</x:String>
+  <x:String x:Key="ClearTransferQueue">✕  Clear queue</x:String>
+  <x:String x:Key="ClearTransferQueueTitle">Clear transfer queue</x:String>
+  <x:String x:Key="ClearTransferQueuePrompt">Transfers are in progress. Do you want to stop them and clear the queue?</x:String>
+  <x:String x:Key="Confirm">Confirm</x:String>
+  <x:String x:Key="TransferUploading">Uploading</x:String>
+  <x:String x:Key="TransferDownloading">Downloading</x:String>
+  <x:String x:Key="TransferInProgress">In progress</x:String>
+  <x:String x:Key="TransferCompleted">Completed</x:String>
+  <x:String x:Key="TransferFailed">Failed</x:String>
+  <x:String x:Key="TransferCancelled">Cancelled</x:String>
   <x:String x:Key="ActiveTransfers">0 active</x:String>
   <x:String x:Key="TransferQueueHint">Transfers started here will appear in this queue.</x:String>
   <x:String x:Key="TransfersEmpty">Started transfers will appear here.</x:String>

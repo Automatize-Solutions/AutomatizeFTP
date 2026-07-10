@@ -180,8 +180,9 @@
                     <ListBox x:Name="FilesList" Classes="files" Padding="0" ItemsSource="{Binding Files}"
                              ItemContainerTheme="{StaticResource FileItemTheme}"
                              IsVisible="{Binding IsReady}" ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                             SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
-                             Focusable="True" PointerPressed="OnFilesPointerPressed" KeyDown="OnFilesKeyDown">
+                             SelectionMode="Multiple" SelectionChanged="OnFilesSelectionChanged"
+                             Focusable="True" PointerPressed="OnFilesPointerPressed" PointerMoved="OnFilesPointerMoved"
+                             PointerReleased="OnFilesPointerReleased" KeyDown="OnFilesKeyDown">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="interfaces:IFileViewModel">
                                 <views:FileView DataContext="{Binding}" />

@@ -120,21 +120,36 @@ public sealed class FtpCloud : ICloud
         return Task.CompletedTask;
     }
 
-    public async Task UploadFile(string to, Stream from, string name)
+    public async Task UploadFile(
+        string to,
+        Stream from,
+        string name,
+        IProgress<double> progress = null,
+        CancellationToken cancellationToken = default)
     {
         using var connection = _factory();
-        await connection.Connect().ConfigureAwait(false);
+        await connection.Connect(cancellationToken).ConfigureAwait(false);
         var path = CombineRemotePath(to, name);
-        await connection.UploadStream(@from, path).ConfigureAwait(false);
-        await connection.Disconnect().ConfigureAwait(false);
+        IProgress<FtpProgress> ftpProgress = progress is null
+            ? null
+            : new Progress<FtpProgress>(value => progress.Report(value.Progress));
+        await connection.UploadStream(@from, path, FtpRemoteExists.Overwrite, true, ftpProgress, cancellationToken).ConfigureAwait(false);
+        await connection.Disconnect(cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task DownloadFile(string from, Stream to)
+    public async Task DownloadFile(
+        string from,
+        Stream to,
+        IProgress<double> progress = null,
+        CancellationToken cancellationToken = default)
     {
         using var connection = _factory();
-        await connection.Connect().ConfigureAwait(false);
-        await connection.DownloadStream(to, @from).ConfigureAwait(false);
-        await connection.Disconnect().ConfigureAwait(false);
+        await connection.Connect(cancellationToken).ConfigureAwait(false);
+        IProgress<FtpProgress> ftpProgress = progress is null
+            ? null
+            : new Progress<FtpProgress>(value => progress.Report(value.Progress));
+        await connection.DownloadStream(to, @from, 0, ftpProgress, cancellationToken).ConfigureAwait(false);
+        await connection.Disconnect(cancellationToken).ConfigureAwait(false);
     }
 
     private static string CombineRemotePath(string path, string name) =>

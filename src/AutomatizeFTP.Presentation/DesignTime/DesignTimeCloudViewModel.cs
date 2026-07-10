@@ -27,6 +27,8 @@ public class DesignTimeCloudViewModel : ReactiveObject, ICloudViewModel
 
     public IFileViewModel SelectedFile { get; set; }
 
+    public IReadOnlyList<IFileViewModel> SelectedFiles { get; } = Array.Empty<IFileViewModel>();
+
     public IEnumerable<IFileViewModel> Files { get; }
 
     public ReactiveCommand<Unit, Unit> DownloadSelectedFile { get; }
@@ -50,6 +52,10 @@ public class DesignTimeCloudViewModel : ReactiveObject, ICloudViewModel
     public Task UploadFileFromAsync(string sourcePath, string name, bool isFolder) => Task.CompletedTask;
 
     public Task DownloadFileToAsync(string sourcePath, string destinationPath, string name, bool isFolder) => Task.CompletedTask;
+
+    public void SetSelectedFiles(IEnumerable<IFileViewModel> files)
+    {
+    }
 
     public bool IsCurrentPathEmpty { get; }
 

@@ -33,6 +33,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
     private readonly ICloudViewModel _localProvider;
     private readonly TransferQueue _transferQueue;
     private string _errorMessage;
+    private IReadOnlyList<IFileViewModel> _selectedFiles = Array.Empty<IFileViewModel>();
 
     public CloudViewModel(
         CloudState state,
@@ -176,7 +177,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .InvokeCommand(Refresh);
 
         this.WhenAnyValue(x => x.CurrentPath)
-            .Subscribe(_ => SelectedFile = null);
+            .Subscribe(_ => SetSelectedFiles(Array.Empty<IFileViewModel>()));
 
         _isCurrentPathEmpty = this
             .WhenAnyValue(x => x.Files)
@@ -205,8 +206,8 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
         UploadToCurrentPath.InvokeCommand(Refresh);
 
         var canDownloadSelectedFile = this
-            .WhenAnyValue(x => x.SelectedFile)
-            .Select(file => file?.IsFolder == false)
+            .WhenAnyValue(x => x.SelectedFiles)
+            .Select(files => files.Count > 0)
             .CombineLatest(Refresh.IsExecuting, canInteract, (down, loading, can) => down && !loading && can);
 
         if (_localProvider is not null)
@@ -218,23 +219,28 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
                     (canDownload, hasDestination) => canDownload && hasDestination);
         }
 
-        DownloadSelectedFile = _localProvider is null
-            ? ReactiveCommand.CreateFromObservable(
-                () => Observable
-                    .FromAsync(() => files.OpenWrite(SelectedFile.Name))
-                    .Where(stream => stream != null)
-                    .Select(stream => _cloud.DownloadFile(SelectedFile.Path, stream))
-                    .SelectMany(task => task.ToObservable()),
-                canDownloadSelectedFile,
-                outputScheduler: _scheduler)
-            : ReactiveCommand.CreateFromTask(
-                () => _localProvider.DownloadFileToAsync(
-                    SelectedFile.Path,
-                    _localProvider.CurrentPath,
-                    SelectedFile.Name,
-                    SelectedFile.IsFolder),
-                canDownloadSelectedFile,
-                outputScheduler: _scheduler);
+        DownloadSelectedFile = ReactiveCommand.CreateFromTask(
+            async () =>
+            {
+                foreach (var file in SelectedFiles)
+                {
+                    if (_localProvider is not null)
+                    {
+                        await _localProvider.DownloadFileToAsync(
+                            file.Path,
+                            _localProvider.CurrentPath,
+                            file.Name,
+                            file.IsFolder).ConfigureAwait(false);
+                        continue;
+                    }
+
+                    await using var stream = await files.OpenWrite(file.Name).ConfigureAwait(false);
+                    if (stream is not null)
+                        await _cloud.DownloadFile(file.Path, stream).ConfigureAwait(false);
+                }
+            },
+            canDownloadSelectedFile,
+            outputScheduler: _scheduler);
 
         var canLogout = cloud
             .IsAuthorized
@@ -266,7 +272,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .CombineLatest(Refresh.IsExecuting, canInteract, (sel, loading, ci) => sel && !loading && ci);
 
         UnselectFile = ReactiveCommand.Create(
-            () => { SelectedFile = null; },
+            () => SetSelectedFiles(Array.Empty<IFileViewModel>()),
             canUnselectFile,
             outputScheduler: _scheduler);
 
@@ -293,6 +299,8 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     [Reactive]
     public partial IFileViewModel SelectedFile { get; set; }
+
+    public IReadOnlyList<IFileViewModel> SelectedFiles => _selectedFiles;
 
     public bool IsCurrentPathEmpty => _isCurrentPathEmpty.Value;
 
@@ -375,9 +383,10 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     public Task UploadFileFromAsync(string sourcePath, string name, bool isFolder)
     {
-        var transfer = () => UploadFileFromCoreAsync(sourcePath, name, isFolder);
+        Func<CancellationToken, IProgress<double>, Task> transfer = (cancellationToken, progress) =>
+            UploadFileFromCoreAsync(sourcePath, name, isFolder, cancellationToken, progress);
         return _transferQueue is null
-            ? transfer()
+            ? transfer(CancellationToken.None, null)
             : _transferQueue.RunAsync(name, "Uploading", sourcePath, CurrentPath, transfer);
     }
 
@@ -389,10 +398,21 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     public Task DownloadFileToAsync(string sourcePath, string destinationPath, string name, bool isFolder)
     {
-        var transfer = () => DownloadFileToCoreAsync(sourcePath, destinationPath, name, isFolder);
+        Func<CancellationToken, IProgress<double>, Task> transfer = (cancellationToken, progress) =>
+            DownloadFileToCoreAsync(sourcePath, destinationPath, name, isFolder, cancellationToken, progress);
         return _transferQueue is null
-            ? transfer()
+            ? transfer(CancellationToken.None, null)
             : _transferQueue.RunAsync(name, "Downloading", sourcePath, destinationPath, transfer);
+    }
+
+    public void SetSelectedFiles(IEnumerable<IFileViewModel> files)
+    {
+        _selectedFiles = files.ToArray();
+        this.RaisePropertyChanged(nameof(SelectedFiles));
+
+        var selectedFile = _selectedFiles.FirstOrDefault();
+        if (!ReferenceEquals(SelectedFile, selectedFile))
+            SelectedFile = selectedFile;
     }
 
     private static string CombineRemotePath(string path, string name) =>
@@ -410,36 +430,74 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
         return normalized;
     }
 
-    private async Task UploadFileFromCoreAsync(string sourcePath, string name, bool isFolder)
+    private static void TryDeletePartialFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task UploadFileFromCoreAsync(
+        string sourcePath,
+        string name,
+        bool isFolder,
+        CancellationToken cancellationToken,
+        IProgress<double> progress)
     {
         if (isFolder)
         {
-            await UploadDirectoryAsync(sourcePath, CurrentPath, name).ConfigureAwait(false);
+            await UploadDirectoryAsync(sourcePath, CurrentPath, name, cancellationToken, progress).ConfigureAwait(false);
             return;
         }
 
         await using var stream = File.OpenRead(sourcePath);
-        await _cloud.UploadFile(CurrentPath, stream, name).ConfigureAwait(false);
+        await _cloud.UploadFile(CurrentPath, stream, name, progress, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task DownloadFileToCoreAsync(
         string sourcePath,
         string destinationPath,
         string name,
-        bool isFolder)
+        bool isFolder,
+        CancellationToken cancellationToken,
+        IProgress<double> progress)
     {
         if (isFolder)
         {
-            await DownloadDirectoryAsync(sourcePath, destinationPath, name).ConfigureAwait(false);
+            await DownloadDirectoryAsync(sourcePath, destinationPath, name, cancellationToken, progress).ConfigureAwait(false);
             return;
         }
 
         var targetPath = Path.Combine(destinationPath, name);
-        await using var stream = File.Create(targetPath);
-        await _cloud.DownloadFile(sourcePath, stream).ConfigureAwait(false);
+        var temporaryPath = targetPath + ".automatizeftp.part";
+        try
+        {
+            TryDeletePartialFile(temporaryPath);
+            await using (var stream = File.Create(temporaryPath))
+            {
+                await _cloud.DownloadFile(sourcePath, stream, progress, cancellationToken).ConfigureAwait(false);
+            }
+
+            File.Move(temporaryPath, targetPath, true);
+        }
+        catch
+        {
+            TryDeletePartialFile(temporaryPath);
+            throw;
+        }
     }
 
-    private async Task UploadDirectoryAsync(string sourcePath, string destinationPath, string name)
+    private async Task UploadDirectoryAsync(
+        string sourcePath,
+        string destinationPath,
+        string name,
+        CancellationToken cancellationToken,
+        IProgress<double> progress)
     {
         var existingFolder = (await _cloud.GetFiles(destinationPath).ConfigureAwait(false))
             .FirstOrDefault(file => file.IsFolder &&
@@ -450,18 +508,24 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
         foreach (var directory in Directory.EnumerateDirectories(sourcePath))
         {
-            await UploadDirectoryAsync(directory, remotePath, Path.GetFileName(directory))
+            await UploadDirectoryAsync(directory, remotePath, Path.GetFileName(directory), cancellationToken, progress)
                 .ConfigureAwait(false);
         }
 
         foreach (var file in Directory.EnumerateFiles(sourcePath))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             await using var stream = File.OpenRead(file);
-            await _cloud.UploadFile(remotePath, stream, Path.GetFileName(file)).ConfigureAwait(false);
+            await _cloud.UploadFile(remotePath, stream, Path.GetFileName(file), progress, cancellationToken).ConfigureAwait(false);
         }
     }
 
-    private async Task DownloadDirectoryAsync(string sourcePath, string destinationPath, string name)
+    private async Task DownloadDirectoryAsync(
+        string sourcePath,
+        string destinationPath,
+        string name,
+        CancellationToken cancellationToken,
+        IProgress<double> progress)
     {
         var localPath = Path.Combine(destinationPath, name);
         Directory.CreateDirectory(localPath);
@@ -469,15 +533,30 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
         var files = await _cloud.GetFiles(sourcePath).ConfigureAwait(false);
         foreach (var file in files)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (file.IsFolder)
             {
-                await DownloadDirectoryAsync(file.Path, localPath, file.Name).ConfigureAwait(false);
+                await DownloadDirectoryAsync(file.Path, localPath, file.Name, cancellationToken, progress).ConfigureAwait(false);
                 continue;
             }
 
             var targetPath = Path.Combine(localPath, file.Name);
-            await using var stream = File.Create(targetPath);
-            await _cloud.DownloadFile(file.Path, stream).ConfigureAwait(false);
+            var temporaryPath = targetPath + ".automatizeftp.part";
+            try
+            {
+                TryDeletePartialFile(temporaryPath);
+                await using (var stream = File.Create(temporaryPath))
+                {
+                    await _cloud.DownloadFile(file.Path, stream, progress, cancellationToken).ConfigureAwait(false);
+                }
+
+                File.Move(temporaryPath, targetPath, true);
+            }
+            catch
+            {
+                TryDeletePartialFile(temporaryPath);
+                throw;
+            }
         }
     }
 
@@ -515,7 +594,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
     private void UpdateFileSelection(IFileViewModel selectedFile)
     {
         foreach (var file in Files ?? Enumerable.Empty<IFileViewModel>())
-            file.IsSelected = ReferenceEquals(file, selectedFile);
+            file.IsSelected = _selectedFiles.Contains(file);
     }
 
     private void ActivateRefreshOnStateChanges(CompositeDisposable disposable)

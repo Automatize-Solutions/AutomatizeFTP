@@ -77,13 +77,17 @@ public sealed class LocalCloud : ICloud
             .AsEnumerable();
     });
 
-    public async Task DownloadFile(string from, Stream to)
+    public async Task DownloadFile(
+        string from,
+        Stream to,
+        IProgress<double> progress = null,
+        CancellationToken cancellationToken = default)
     {
         if (IsDirectory(from)) throw new InvalidOperationException("Can't download directory.");
 
         using var fileStream = File.OpenRead(@from);
         fileStream.Seek(0, SeekOrigin.Begin);
-        await fileStream.CopyToAsync(to).ConfigureAwait(false);
+        await CopyWithProgressAsync(fileStream, to, progress, cancellationToken).ConfigureAwait(false);
     }
 
     public Task CreateFolder(string at, string name) => Task.Run(() =>
@@ -102,14 +106,19 @@ public sealed class LocalCloud : ICloud
         else File.Move(path, newName);
     });
 
-    public async Task UploadFile(string to, Stream from, string name)
+    public async Task UploadFile(
+        string to,
+        Stream from,
+        string name,
+        IProgress<double> progress = null,
+        CancellationToken cancellationToken = default)
     {
         if (!IsDirectory(to)) throw new InvalidOperationException("Can't upload to a non-directory.");
 
         var path = Path.Combine(to, name);
         using var fileStream = File.Create(path);
         from.Seek(0, SeekOrigin.Begin);
-        await from.CopyToAsync(fileStream).ConfigureAwait(false);
+        await CopyWithProgressAsync(from, fileStream, progress, cancellationToken).ConfigureAwait(false);
     }
 
     public Task Delete(string path, bool isFolder) => Task.Run(() =>
@@ -124,6 +133,27 @@ public sealed class LocalCloud : ICloud
         return GetAllDrives()
             .Select(x => x.AvailableFreeSpace)
             .Sum();
+    }
+
+    private static async Task CopyWithProgressAsync(
+        Stream source,
+        Stream destination,
+        IProgress<double> progress,
+        CancellationToken cancellationToken)
+    {
+        var totalBytes = source.CanSeek ? source.Length : 0;
+        var transferredBytes = source.CanSeek ? source.Position : 0;
+        var buffer = new byte[81920];
+        int bytesRead;
+
+        progress?.Report(totalBytes > 0 ? transferredBytes * 100d / totalBytes : 0);
+        while ((bytesRead = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
+        {
+            await destination.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken).ConfigureAwait(false);
+            transferredBytes += bytesRead;
+            if (totalBytes > 0)
+                progress?.Report(transferredBytes * 100d / totalBytes);
+        }
     }
 
     private static IEnumerable<DriveInfo> GetAllDrives() =>

@@ -13,6 +13,7 @@ public sealed partial class ProviderView : ReactiveUserControl<ICloudViewModel>
 {
     private string _searchBuffer = string.Empty;
     private DateTime _lastSearchAt = DateTime.MinValue;
+    private IFileViewModel _selectionAnchor;
 
     public ProviderView()
     {
@@ -49,10 +50,15 @@ public sealed partial class ProviderView : ReactiveUserControl<ICloudViewModel>
         return null;
     }
 
-    private static void OnFilesPointerPressed(object sender, PointerPressedEventArgs args)
+    private static IFileViewModel FindFileViewModel(object source)
     {
-        if (sender is ListBox list)
-            list.Focus();
+        for (var control = source as Control; control is not null; control = control.Parent as Control)
+        {
+            if (control.DataContext is IFileViewModel file)
+                return file;
+        }
+
+        return null;
     }
 
     private static void OnDragOver(object sender, DragEventArgs args)
@@ -65,6 +71,48 @@ public sealed partial class ProviderView : ReactiveUserControl<ICloudViewModel>
             ? DragDropEffects.Copy
             : DragDropEffects.None;
         args.Handled = true;
+    }
+
+    private void OnFilesPointerPressed(object sender, PointerPressedEventArgs args)
+    {
+        if (sender is ListBox list)
+        {
+            list.Focus();
+            _selectionAnchor = args.GetCurrentPoint(list).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed
+                ? FindFileViewModel(args.Source)
+                : null;
+        }
+    }
+
+    private void OnFilesSelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        ViewModel?.SetSelectedFiles(FilesList.SelectedItems.OfType<IFileViewModel>());
+    }
+
+    private void OnFilesPointerMoved(object sender, PointerEventArgs args)
+    {
+        if (_selectionAnchor is null || args.GetCurrentPoint(FilesList).Properties.IsLeftButtonPressed == false)
+            return;
+
+        var target = FindFileViewModel(FilesList.InputHitTest(args.GetPosition(FilesList)));
+        if (target is null)
+            return;
+
+        var files = FilesList.Items.OfType<IFileViewModel>().ToList();
+        var anchorIndex = files.IndexOf(_selectionAnchor);
+        var targetIndex = files.IndexOf(target);
+        if (anchorIndex < 0 || targetIndex < 0)
+            return;
+
+        var start = Math.Min(anchorIndex, targetIndex);
+        var count = Math.Abs(anchorIndex - targetIndex) + 1;
+        FilesList.SelectedItems = files.GetRange(start, count);
+        args.Handled = true;
+    }
+
+    private void OnFilesPointerReleased(object sender, PointerReleasedEventArgs args)
+    {
+        _selectionAnchor = null;
     }
 
     private async void OnDrop(object sender, DragEventArgs args)
@@ -117,8 +165,7 @@ public sealed partial class ProviderView : ReactiveUserControl<ICloudViewModel>
 
         if (file is not null)
         {
-            ViewModel.SelectedFile = file;
-            FilesList.SelectedItem = file;
+            FilesList.SelectedItems = new[] { file };
             FilesList.ScrollIntoView(file);
         }
 

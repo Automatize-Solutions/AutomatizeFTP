@@ -118,8 +118,8 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
             .Subscribe(type => state.SelectedSupportedType = type);
 
         var localSelection = LocalProvider is null
-            ? Observable.Return<IFileViewModel>(null)
-            : LocalProvider.WhenAnyValue(x => x.SelectedFile);
+            ? Observable.Return<IReadOnlyList<IFileViewModel>>(Array.Empty<IFileViewModel>())
+            : LocalProvider.WhenAnyValue(x => x.SelectedFiles);
         var remoteSelection = this.WhenAnyValue(x => x.SelectedProvider);
 
         var canUpload = Observable.CombineLatest(
@@ -128,14 +128,15 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
                 (remote, local) => remote is not null &&
                                    remote.Auth.IsAuthenticated &&
                                    remote.CanInteract &&
-                                   local?.IsFile == true)
+                                   local.Count > 0)
             .ObserveOn(scheduler);
 
         UploadToRemote = ReactiveCommand.CreateFromTask(
             async () =>
             {
-                var source = LocalProvider.SelectedFile;
-                await SelectedProvider.UploadFileFromAsync(source.Path, source.Name, source.IsFolder).ConfigureAwait(false);
+                foreach (var source in LocalProvider.SelectedFiles)
+                    await SelectedProvider.UploadFileFromAsync(source.Path, source.Name, source.IsFolder).ConfigureAwait(false);
+
                 SelectedProvider.Refresh.Execute().Subscribe();
             },
             canUpload,
@@ -147,7 +148,7 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
                 (remote, local) => remote is not null &&
                                    remote.Auth.IsAuthenticated &&
                                    remote.CanInteract &&
-                                   remote.SelectedFile?.IsFile == true &&
+                                   remote.SelectedFiles.Count > 0 &&
                                    local is not null &&
                                    !string.IsNullOrWhiteSpace(LocalProvider.CurrentPath))
             .ObserveOn(scheduler);
@@ -155,8 +156,9 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
         DownloadToLocal = ReactiveCommand.CreateFromTask(
             async () =>
             {
-                var source = SelectedProvider.SelectedFile;
-                await LocalProvider.DownloadFileToAsync(source.Path, LocalProvider.CurrentPath, source.Name, source.IsFolder).ConfigureAwait(false);
+                foreach (var source in SelectedProvider.SelectedFiles)
+                    await LocalProvider.DownloadFileToAsync(source.Path, LocalProvider.CurrentPath, source.Name, source.IsFolder).ConfigureAwait(false);
+
                 LocalProvider.Refresh.Execute().Subscribe();
             },
             canDownload,

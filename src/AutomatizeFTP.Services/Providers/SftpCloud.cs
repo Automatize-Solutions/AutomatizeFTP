@@ -133,20 +133,51 @@ public sealed class SftpCloud : ICloud
         connection.Disconnect();
     });
 
-    public Task UploadFile(string to, Stream from, string name) => Task.Run(() =>
+    public Task UploadFile(
+        string to,
+        Stream from,
+        string name,
+        IProgress<double> progress = null,
+        CancellationToken cancellationToken = default)
     {
-        using var connection = _factory();
-        connection.Connect();
-        var path = Path.Combine(to, name);
-        connection.UploadFile(@from, path);
-        connection.Disconnect();
-    });
+        return Task.Run(
+            () =>
+            {
+                using var connection = _factory();
+                connection.Connect();
+                var path = Path.Combine(to, name);
+                var totalBytes = from.CanSeek ? from.Length : 0;
+                connection.UploadFile(@from, path, true, bytesTransferred =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (totalBytes > 0)
+                        progress?.Report(bytesTransferred * 100d / totalBytes);
+                });
+                connection.Disconnect();
+            },
+            cancellationToken);
+    }
 
-    public Task DownloadFile(string from, Stream to) => Task.Run(() =>
+    public Task DownloadFile(
+        string from,
+        Stream to,
+        IProgress<double> progress = null,
+        CancellationToken cancellationToken = default)
     {
-        using var connection = _factory();
-        connection.Connect();
-        connection.DownloadFile(@from, to);
-        connection.Disconnect();
-    });
+        return Task.Run(
+            () =>
+            {
+                using var connection = _factory();
+                connection.Connect();
+                var totalBytes = connection.GetAttributes(from).Size;
+                connection.DownloadFile(@from, to, bytesTransferred =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (totalBytes > 0)
+                        progress?.Report(bytesTransferred * 100d / totalBytes);
+                });
+                connection.Disconnect();
+            },
+            cancellationToken);
+    }
 }

@@ -17,6 +17,8 @@ public interface ICloudViewModel : INotifyPropertyChanged
 
     IFileViewModel SelectedFile { get; set; }
 
+    IReadOnlyList<IFileViewModel> SelectedFiles { get; }
+
     IEnumerable<IFileViewModel> Files { get; }
 
     IEnumerable<IFolderViewModel> BreadCrumbs { get; }
@@ -42,6 +44,8 @@ public interface ICloudViewModel : INotifyPropertyChanged
     Task UploadFileFromAsync(string sourcePath, string name, bool isFolder);
 
     Task DownloadFileToAsync(string sourcePath, string destinationPath, string name, bool isFolder);
+
+    void SetSelectedFiles(IEnumerable<IFileViewModel> files);
 
     bool IsCurrentPathEmpty { get; }
 

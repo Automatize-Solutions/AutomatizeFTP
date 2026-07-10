@@ -1,6 +1,7 @@
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:interfaces="clr-namespace:AutomatizeFTP.Presentation.Interfaces;assembly=AutomatizeFTP.Presentation"
+    xmlns:services="clr-namespace:AutomatizeFTP.Presentation.Avalonia.Services"
     xmlns:views="clr-namespace:AutomatizeFTP.Presentation.Avalonia.Views"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:designTime="clr-namespace:AutomatizeFTP.Presentation.DesignTime;assembly=AutomatizeFTP.Presentation"
@@ -11,6 +12,9 @@
     <Design.DataContext>
         <designTime:DesignTimeMainViewModel />
     </Design.DataContext>
+    <UserControl.Resources>
+        <services:LocalizedTextConverter x:Key="LocalizedTextConverter" />
+    </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="Button">
             <Setter Property="Margin" Value="0" />
@@ -33,6 +37,40 @@
         </Style>
         <Style Selector="Button.accent:pointerover">
             <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+        </Style>
+        <Style Selector="Button.queueClear">
+            <Setter Property="Background" Value="{DynamicResource AccentSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="10,6" />
+        </Style>
+        <Style Selector="Button.queueClear:pointerover">
+            <Setter Property="Background" Value="{DynamicResource HoverSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="TabControl">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="TabItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="12,7" />
+            <Setter Property="Margin" Value="0,0,3,0" />
+        </Style>
+        <Style Selector="TabItem:pointerover">
+            <Setter Property="Background" Value="{DynamicResource HoverSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
+        <Style Selector="TabItem:selected">
+            <Setter Property="Background" Value="{DynamicResource AccentSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         </Style>
         <Style Selector="ComboBox.workspaceSelector">
             <Setter Property="Background" Value="{DynamicResource SurfaceSubtleBrush}" />
@@ -177,19 +215,27 @@
                                     <TextBlock Text="{Binding TransferQueue.ActiveCount}" Foreground="{DynamicResource AccentBrush}" FontSize="10" />
                                 </Border>
                             </StackPanel>
-                            <TextBlock Grid.Column="1" Text="{DynamicResource TransferQueueHint}"
-                                       Foreground="{DynamicResource TextMutedBrush}" FontSize="11" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <TextBlock Text="{DynamicResource TransferQueueHint}"
+                                           Foreground="{DynamicResource TextMutedBrush}" FontSize="11" VerticalAlignment="Center" />
+                                <Button x:Name="ClearTransferQueueButton" Content="{DynamicResource ClearTransferQueue}"
+                                    Classes="queueClear" IsEnabled="{Binding TransferQueue.HasItems}" />
+                            </StackPanel>
                         </Grid>
                         <Grid Grid.Row="1">
                             <ItemsControl ItemsSource="{Binding TransferQueue.Active}"
                                           IsVisible="{Binding TransferQueue.HasActiveItems}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid ColumnDefinitions="2*,Auto,3*,3*" Margin="0,6">
+                                        <Grid ColumnDefinitions="2*,120,120,3*,3*" Margin="0,6">
                                             <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Operation}" Foreground="{DynamicResource AccentBrush}" Margin="12,0" />
-                                            <TextBlock Grid.Column="2" Text="{Binding Source}" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Grid.Column="3" Text="{Binding Destination}" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" Margin="12,0,0,0" />
+                                            <ProgressBar Grid.Column="1" Width="100" Height="8" Minimum="0" Maximum="100"
+                                                         Value="{Binding Progress}" Foreground="{DynamicResource AccentBrush}"
+                                                         HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,12,0" />
+                                            <TextBlock Grid.Column="2" Text="{Binding Operation, Converter={StaticResource LocalizedTextConverter}}"
+                                                       Foreground="{DynamicResource AccentBrush}" Margin="12,0" />
+                                            <TextBlock Grid.Column="3" Text="{Binding Source}" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="4" Text="{Binding Destination}" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" Margin="12,0,0,0" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -208,7 +254,8 @@
                                 <DataTemplate>
                                     <Grid ColumnDefinitions="2*,Auto,*" Margin="0,6">
                                         <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Status}" Foreground="{DynamicResource DangerBrush}" Margin="12,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Status, Converter={StaticResource LocalizedTextConverter}}"
+                                                   Foreground="{DynamicResource DangerBrush}" Margin="12,0" />
                                         <TextBlock Grid.Column="2" Text="{Binding ErrorMessage}" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                     </Grid>
                                 </DataTemplate>
@@ -227,7 +274,8 @@
                                 <DataTemplate>
                                     <Grid ColumnDefinitions="2*,Auto,3*,3*" Margin="0,6">
                                         <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Status}" Foreground="{DynamicResource SuccessBrush}" Margin="12,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Status, Converter={StaticResource LocalizedTextConverter}}"
+                                                   Foreground="{DynamicResource SuccessBrush}" Margin="12,0" />
                                         <TextBlock Grid.Column="2" Text="{Binding Source}" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Grid.Column="3" Text="{Binding Destination}" Foreground="{DynamicResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" Margin="12,0,0,0" />
                                     </Grid>

@@ -18,9 +18,18 @@ public interface ICloud
 
     Task<IEnumerable<FolderModel>> GetBreadCrumbs(string path);
 
-    Task UploadFile(string toPath, Stream fromStream, string name);
+    Task UploadFile(
+        string toPath,
+        Stream fromStream,
+        string name,
+        IProgress<double> progress = null,
+        CancellationToken cancellationToken = default);
 
-    Task DownloadFile(string fromPath, Stream fromStream);
+    Task DownloadFile(
+        string fromPath,
+        Stream fromStream,
+        IProgress<double> progress = null,
+        CancellationToken cancellationToken = default);
 
     Task CreateFolder(string path, string name);
 

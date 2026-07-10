@@ -13,7 +13,10 @@ using AutomatizeFTP.Services.Models;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
+using Avalonia.Styling;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
 
@@ -63,7 +66,87 @@ public class App : Application
         view.LanguageButton.Click += (_, _) => LocalizationManager.Instance.ToggleLanguage();
         LocalizationManager.Instance.LanguageChanged += (_, _) => _state.Language = LocalizationManager.Instance.CurrentLanguage;
         view.DataContext ??= CreateViewModel(window);
+        view.ClearTransferQueueButton.Click += async (_, _) =>
+        {
+            var main = (MainViewModel)view.DataContext;
+            if (main.TransferQueue.HasActiveItems && !await ConfirmClearTransferQueueAsync(window))
+                return;
+
+            await main.TransferQueue.ClearAsync();
+        };
         return view;
+    }
+
+    private static async Task<bool> ConfirmClearTransferQueueAsync(Window owner)
+    {
+        var dialog = new Window
+        {
+            Title = GetResource("ClearTransferQueueTitle"),
+            Background = GetResourceObject("SurfaceBrush") as IBrush,
+            Width = 440,
+            SizeToContent = SizeToContent.Height,
+            CanResize = false,
+            ShowInTaskbar = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+
+        var cancelButton = new Button
+        {
+            Content = GetResource("Close"),
+            Background = GetResourceObject("SurfaceSubtleBrush") as IBrush,
+            BorderBrush = GetResourceObject("BorderBrush") as IBrush,
+            Foreground = GetResourceObject("TextPrimaryBrush") as IBrush,
+            MinWidth = 90,
+            HorizontalContentAlignment = HorizontalAlignment.Center
+        };
+        var confirmButton = new Button
+        {
+            Content = GetResource("Confirm"),
+            Background = GetResourceObject("AccentBrush") as IBrush,
+            BorderBrush = GetResourceObject("AccentBrush") as IBrush,
+            Foreground = GetResourceObject("AccentTextBrush") as IBrush,
+            MinWidth = 90,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            Classes = { "accent" }
+        };
+        cancelButton.Click += (_, _) => dialog.Close(false);
+        confirmButton.Click += (_, _) => dialog.Close(true);
+
+        dialog.Content = new StackPanel
+        {
+            Margin = new global::Avalonia.Thickness(24),
+            Spacing = 18,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = GetResource("ClearTransferQueuePrompt"),
+                    Foreground = GetResourceObject("TextPrimaryBrush") as IBrush,
+                    TextWrapping = global::Avalonia.Media.TextWrapping.Wrap
+                },
+                new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Spacing = 10,
+                    Children = { cancelButton, confirmButton }
+                }
+            }
+        };
+
+        return await dialog.ShowDialog<bool>(owner);
+    }
+
+    private static string GetResource(string key) =>
+        GetResourceObject(key)?.ToString() ?? key;
+
+    private static object GetResourceObject(string key)
+    {
+        var resources = Current?.Resources;
+        return resources is not null &&
+               resources.TryGetResource(key, ThemeVariant.Default, out var resource)
+            ? resource
+            : null;
     }
 
     private MainState LoadState()

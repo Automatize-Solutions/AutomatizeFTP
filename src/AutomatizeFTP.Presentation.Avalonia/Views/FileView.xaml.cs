@@ -4,6 +4,7 @@ using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using AutomatizeFTP.Presentation.Interfaces;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
@@ -56,6 +57,9 @@ public sealed partial class FileView : ReactiveUserControl<IFileViewModel>
         if (!point.Properties.IsLeftButtonPressed)
             return;
 
+        if (FindAncestorListBox() is { } list && list.Bounds.Contains(args.GetPosition(list)))
+            return;
+
         var current = point.Position;
         if (Math.Abs(current.X - start.X) < 8 && Math.Abs(current.Y - start.Y) < 8)
             return;
@@ -87,5 +91,16 @@ public sealed partial class FileView : ReactiveUserControl<IFileViewModel>
         _dragStart = null;
         _dragStartEvent = null;
         args.Pointer.Capture(null);
+    }
+
+    private ListBox FindAncestorListBox()
+    {
+        for (var control = Parent as Control; control is not null; control = control.Parent as Control)
+        {
+            if (control is ListBox list)
+                return list;
+        }
+
+        return null;
     }
 }

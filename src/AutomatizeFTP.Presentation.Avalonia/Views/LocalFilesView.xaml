@@ -153,10 +153,12 @@
                 </Border>
                 <Grid Grid.Row="1">
                     <ListBox x:Name="FilesList" ItemsSource="{Binding Files}" Padding="0"
-                             IsVisible="{Binding IsReady}" SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
+                             IsVisible="{Binding IsReady}" SelectionMode="Multiple"
                              ItemContainerTheme="{StaticResource LocalFileItemTheme}"
                              ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                             Focusable="True" PointerPressed="OnFilesPointerPressed" KeyDown="OnFilesKeyDown">
+                             Focusable="True" SelectionChanged="OnFilesSelectionChanged"
+                             PointerPressed="OnFilesPointerPressed" PointerMoved="OnFilesPointerMoved"
+                             PointerReleased="OnFilesPointerReleased" KeyDown="OnFilesKeyDown">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="interfaces:IFileViewModel">
                                 <views:FileView DataContext="{Binding}" />
