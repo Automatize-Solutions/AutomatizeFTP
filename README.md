@@ -77,6 +77,38 @@ dotnet test  src/AutomatizeFTP.slnx
 dotnet run --project src/AutomatizeFTP.Presentation.Avalonia
 ```
 
+## Releases & distribution
+
+Packaging and auto-updates are handled by [Velopack](https://velopack.io).
+Pushing a tag (`git tag v1.0.0 && git push origin v1.0.0`) runs the
+[release workflow](.github/workflows/release.yml), which tests, packages every
+platform and publishes a GitHub Release with:
+
+- **macOS** (`osx-arm64` / `osx-x64`): `.pkg` installer + portable `.zip`
+  (ad-hoc signed — Gatekeeper requires right-click → Open, or approval under
+  System Settings on macOS 15+, until builds are notarized with a Developer ID)
+- **Windows** (`win-x64`): `Setup.exe` installer + portable `.zip`
+- **Linux** (`linux-x64`): `.AppImage`
+
+On startup the app checks GitHub Releases for a newer version in the
+background, downloads it silently and applies it on the next launch.
+Note: anonymous update checks only work once the repository (or at least its
+releases) is public; while it is private the check fails silently and the app
+behaves normally.
+
+Manual packaging locally (same steps the workflow runs):
+
+```bash
+dotnet tool install --global vpk
+dotnet publish src/AutomatizeFTP.Presentation.Avalonia -c Release -r osx-x64 \
+  --self-contained -p:Version=1.0.0 -p:DebugType=none -o publish
+vpk pack --packId AutomatizeFTP --packVersion 1.0.0 --packDir publish \
+  --mainExe AutomatizeFTP.Presentation.Avalonia --packTitle AutomatizeFTP \
+  --packAuthors "Automatize Solutions" --channel osx-x64 --outputDir releases \
+  --icon src/AutomatizeFTP.Presentation.Avalonia/Assets/icon.icns \
+  --bundleId com.automatize.AutomatizeFTP --signAppIdentity=-
+```
+
 ## License
 
 MIT — see [`LICENSE`](./LICENSE). This project inherits Camelotia's MIT license and
