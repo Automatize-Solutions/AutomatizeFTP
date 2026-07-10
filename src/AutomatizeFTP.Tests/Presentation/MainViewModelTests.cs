@@ -118,6 +118,9 @@ public sealed class MainViewModelTests
 
         model.Clouds.Should().NotBeEmpty();
         model.Clouds.Count.Should().Be(1);
+        model.SelectedProvider.Should().NotBeNull();
+        model.SelectedProvider.Id.Should().Be(model.Clouds.First().Id);
+        model.WelcomeScreenVisible.Should().BeFalse();
     }
 
     [Fact]

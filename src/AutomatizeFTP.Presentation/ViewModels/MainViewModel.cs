@@ -70,7 +70,16 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
             .Select(type => SupportedTypes.Contains(type));
 
         Add = ReactiveCommand.Create(
-            () => state.Clouds.AddOrUpdate(new CloudState { Type = SelectedSupportedType }),
+            () =>
+            {
+                var cloud = new CloudState { Type = SelectedSupportedType };
+
+                // Pre-select the new provider so it gets picked up by the
+                // OnItemAdded subscription below once the pipeline binds it,
+                // collapsing the welcome screen instead of silently adding a row.
+                state.SelectedProviderId = cloud.Id;
+                state.Clouds.AddOrUpdate(cloud);
+            },
             canAddProvider,
             outputScheduler: scheduler);
 
