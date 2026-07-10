@@ -85,4 +85,7 @@
   <x:String x:Key="ValidationPath">Path shouldn't be empty.</x:String>
   <x:String x:Key="ValidationNewName">New name shouldn't be empty.</x:String>
   <x:String x:Key="ValidationOldName">Old name shouldn't be empty.</x:String>
+  <x:String x:Key="UpdateDownloading">Downloading update…</x:String>
+  <x:String x:Key="UpdateReady">Update v{0} ready</x:String>
+  <x:String x:Key="UpdateRestart">Restart now</x:String>
 </ResourceDictionary>

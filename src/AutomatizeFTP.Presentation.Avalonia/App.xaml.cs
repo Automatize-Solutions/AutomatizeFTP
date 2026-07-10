@@ -40,7 +40,13 @@ public class App : Application
         LocalizationManager.Instance.UseLanguage(_state.Language);
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.Exit += (_, _) => SaveState();
+        {
+            desktop.Exit += (_, _) =>
+            {
+                SaveState();
+                UpdateService.Instance.ApplyPendingOnExit();
+            };
+        }
 
         var window = new Window
         {
@@ -56,6 +62,10 @@ public class App : Application
         window.Show();
 
         MacDockIcon.TrySet(Path.Combine(AppContext.BaseDirectory, "Assets", "icon.icns"));
+
+        // Kicked off here (not in Main) so Dispatcher.UIThread exists before the
+        // service posts its first status change.
+        _ = Task.Run(UpdateService.Instance.RunAsync);
 
         base.OnFrameworkInitializationCompleted();
     }
@@ -75,6 +85,7 @@ public class App : Application
         view.SwitchThemeButton.Click += (_, _) => styles.UseNextTheme();
         view.LanguageButton.Click += (_, _) => LocalizationManager.Instance.ToggleLanguage();
         LocalizationManager.Instance.LanguageChanged += (_, _) => _state.Language = LocalizationManager.Instance.CurrentLanguage;
+        WireUpdateStatus(view);
         view.DataContext ??= CreateViewModel(window);
         view.ClearTransferQueueButton.Click += async (_, _) =>
         {
@@ -85,6 +96,32 @@ public class App : Application
             await main.TransferQueue.ClearAsync();
         };
         return view;
+    }
+
+    private static void WireUpdateStatus(MainView view)
+    {
+        var updates = UpdateService.Instance;
+
+        void Render()
+        {
+            var phase = updates.Phase;
+            view.UpdateStatusPanel.IsVisible = phase != UpdateService.UpdatePhase.Idle;
+            view.UpdateProgressBar.IsVisible = phase == UpdateService.UpdatePhase.Downloading;
+            view.RestartUpdateButton.IsVisible = phase == UpdateService.UpdatePhase.Ready;
+            view.UpdateStatusLabel.Text = phase switch
+            {
+                UpdateService.UpdatePhase.Downloading => $"{GetResource("UpdateDownloading")} {updates.DownloadPercent}%",
+                UpdateService.UpdatePhase.Ready => string.Format(GetResource("UpdateReady"), updates.AvailableVersion),
+                _ => string.Empty
+            };
+            if (phase == UpdateService.UpdatePhase.Downloading)
+                view.UpdateProgressBar.Value = updates.DownloadPercent;
+        }
+
+        updates.StatusChanged += (_, _) => Render();
+        LocalizationManager.Instance.LanguageChanged += (_, _) => Render();
+        view.RestartUpdateButton.Click += (_, _) => updates.RestartNow();
+        Render();
     }
 
     private static async Task<bool> ConfirmClearTransferQueueAsync(Window owner)

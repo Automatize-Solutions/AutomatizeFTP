@@ -85,4 +85,7 @@
   <x:String x:Key="ValidationPath">O caminho não pode ficar vazio.</x:String>
   <x:String x:Key="ValidationNewName">O novo nome não pode ficar vazio.</x:String>
   <x:String x:Key="ValidationOldName">O nome antigo não pode ficar vazio.</x:String>
+  <x:String x:Key="UpdateDownloading">Baixando atualização…</x:String>
+  <x:String x:Key="UpdateReady">Atualização v{0} pronta</x:String>
+  <x:String x:Key="UpdateRestart">Reiniciar agora</x:String>
 </ResourceDictionary>
