@@ -123,7 +123,10 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+        # assets.*.json and RELEASES-* are local vpk metadata; the updater and
+        # delta generation only need releases.*.json + the nupkgs.
         run: |
+          rm -f dist/assets.*.json dist/RELEASES-*
           gh release create "$GITHUB_REF_NAME" dist/* \
             --repo "$GITHUB_REPOSITORY" \
             --title "AutomatizeFTP ${GITHUB_REF_NAME#v}" \
