@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using AutomatizeFTP.Presentation.AppState;
 using AutomatizeFTP.Presentation.Interfaces;
 using AutomatizeFTP.Services.Interfaces;
+using AutomatizeFTP.Services.Models;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using ReactiveUI.Validation.Extensions;
@@ -63,6 +64,9 @@ public sealed partial class HostAuthViewModel : ReactiveValidationObject, IHostA
         Username = state.Username;
         Password = state.Password;
         Address = state.Address;
+        if (string.IsNullOrWhiteSpace(state.Port) && provider.Parameters?.Type == CloudType.Ftp)
+            state.Port = "21";
+
         Port = state.Port;
 
         this.WhenAnyValue(x => x.Username)

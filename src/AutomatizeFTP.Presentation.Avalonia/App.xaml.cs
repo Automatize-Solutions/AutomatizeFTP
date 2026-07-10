@@ -29,21 +29,20 @@ public class App : Application
         // suspension driver directly instead: it is the only thing we ever wanted.
         _state = LoadState();
 
-        var suspension = new AutoSuspendHelper(ApplicationLifetime);
-        suspension.OnFrameworkInitializationCompleted();
+        LocalizationManager.Instance.UseLanguage(_state.Language);
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.ShutdownRequested += (_, _) => _driver.SaveState(_state).Subscribe();
+            desktop.Exit += (_, _) => SaveState();
 
         var window = new Window
         {
-            Height = 590,
-            Width = 850,
-            MinHeight = 590,
-            MinWidth = 850,
+            Title = "AutomatizeFTP · FTP Workspace",
+            Height = 760,
+            Width = 1180,
+            MinHeight = 640,
+            MinWidth = 980,
         };
 
-        AttachDevTools(window);
         window.Content = CreateView(window);
         window.Show();
 
@@ -53,17 +52,14 @@ public class App : Application
     public object CreateView(Window window)
     {
         var view = new MainView();
-        var styles = new AvaloniaStyleManager(view);
+        var styles = new AvaloniaStyleManager();
+        styles.UseTheme(_state.Theme);
+        styles.ThemeChanged += (_, _) => _state.Theme = styles.CurrentTheme.ToString();
         view.SwitchThemeButton.Click += (_, _) => styles.UseNextTheme();
+        view.LanguageButton.Click += (_, _) => LocalizationManager.Instance.ToggleLanguage();
+        LocalizationManager.Instance.LanguageChanged += (_, _) => _state.Language = LocalizationManager.Instance.CurrentLanguage;
         view.DataContext ??= CreateViewModel(window);
         return view;
-    }
-
-    private static void AttachDevTools(TopLevel window)
-    {
-#if DEBUG
-        window.AttachDevTools();
-#endif
     }
 
     private MainState LoadState()
@@ -76,6 +72,18 @@ public class App : Application
         {
             Console.WriteLine($"Could not restore app state, starting fresh: {exception.Message}");
             return new MainState();
+        }
+    }
+
+    private void SaveState()
+    {
+        try
+        {
+            _driver.SaveState(_state).Subscribe();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Could not save app state: {exception.Message}");
         }
     }
 

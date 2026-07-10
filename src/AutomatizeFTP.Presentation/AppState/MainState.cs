@@ -25,4 +25,10 @@ public class MainState
 
     [DataMember]
     public Guid SelectedProviderId { get; set; }
+
+    [DataMember]
+    public string Language { get; set; } = "en";
+
+    [DataMember]
+    public string Theme { get; set; } = "Light";
 }

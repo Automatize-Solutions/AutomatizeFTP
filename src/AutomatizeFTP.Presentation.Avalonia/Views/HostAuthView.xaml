@@ -2,7 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:designTime="clr-namespace:AutomatizeFTP.Presentation.DesignTime;assembly=AutomatizeFTP.Presentation"
              x:Class="AutomatizeFTP.Presentation.Avalonia.Views.HostAuthView"
-             Background="{DynamicResource ThemeCardBrush}"
+             x:CompileBindings="False"
+             Background="{DynamicResource SurfaceBrush}"
              Padding="20">
     <Design.DataContext>
         <designTime:DesignTimeHostAuthViewModel />
@@ -10,7 +11,7 @@
     <StackPanel VerticalAlignment="Center"
                 HorizontalAlignment="Center"
                 Width="300">
-        <TextBlock Text="Remote Host Auth"
+        <TextBlock Text="{DynamicResource RemoteHostAuth}"
                    Classes="Heading"
                    Margin="0 10" />
         <ProgressBar HorizontalAlignment="Stretch"
@@ -18,17 +19,17 @@
                      IsVisible="{Binding IsBusy}"
                      Margin="0 5" />
         <StackPanel IsVisible="{Binding HasErrorMessage}"
-                    Background="#ffeeee"
+                    Background="{DynamicResource ErrorSurfaceBrush}"
                     Margin="0 0 0 5">
             <TextBlock Text="{Binding ErrorMessage}"
-                       Foreground="#990000"
+                       Foreground="{DynamicResource ErrorTextBrush}"
                        TextWrapping="Wrap"
                        Margin="10" />
         </StackPanel>
-        <TextBlock Text="Please, enter host address with port:" Margin="0 5" />
+        <TextBlock Text="{DynamicResource AddressPrompt}" Margin="0 5" />
         <Grid ColumnDefinitions="3*,2*">
-            <TextBox Grid.Column="0" Watermark="Address..." Text="{Binding Address, Mode=TwoWay}" />
-            <TextBox Grid.Column="1" Watermark="Port..." Text="{Binding Port, Mode=TwoWay}" Margin="10 5 0 5"/>
+            <TextBox Grid.Column="0" PlaceholderText="{DynamicResource AddressPlaceholder}" Text="{Binding Address, Mode=TwoWay}" />
+            <TextBox Grid.Column="1" PlaceholderText="{DynamicResource PortPlaceholder}" Text="{Binding Port, Mode=TwoWay}" Margin="10 5 0 5"/>
         </Grid>
         <TextBlock x:Name="AddressValidation"
                    Foreground="{DynamicResource ErrorBrush}"
@@ -36,19 +37,19 @@
         <TextBlock x:Name="PortValidation"
                    Foreground="{DynamicResource ErrorBrush}"
                    TextWrapping="Wrap" />
-        <TextBlock Text="Please, enter your user name:" Margin="0 5" />
-        <TextBox Watermark="User name..." Text="{Binding Username, Mode=TwoWay}" />
+        <TextBlock Text="{DynamicResource UsernamePrompt}" Margin="0 5" />
+        <TextBox PlaceholderText="{DynamicResource UsernamePlaceholder}" Text="{Binding Username, Mode=TwoWay}" />
         <TextBlock x:Name="UsernameValidation"
                    Foreground="{DynamicResource ErrorBrush}"
                    TextWrapping="Wrap" />
-        <TextBlock Text="Please, enter your password:" Margin="0 5" />
+        <TextBlock Text="{DynamicResource PasswordPrompt}" Margin="0 5" />
         <TextBox Text="{Binding Password, Mode=TwoWay}"
-                 Watermark="Password..."
+                 PlaceholderText="{DynamicResource PasswordPlaceholder}"
                  PasswordChar="*" />
         <TextBlock x:Name="PasswordValidation"
                    Foreground="{DynamicResource ErrorBrush}"
                    TextWrapping="Wrap" />
-        <Button Content="Login"
+        <Button Classes="primaryAction" Content="{DynamicResource Login}"
                 HorizontalAlignment="Stretch"
                 Command="{Binding Login}"
                 Margin="0 10" />

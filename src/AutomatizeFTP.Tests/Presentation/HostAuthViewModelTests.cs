@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutomatizeFTP.Presentation.AppState;
 using AutomatizeFTP.Presentation.ViewModels;
 using AutomatizeFTP.Services.Interfaces;
+using AutomatizeFTP.Services.Models;
 using FluentAssertions;
 using NSubstitute;
 using ReactiveUI;
@@ -131,6 +132,17 @@ public sealed class HostAuthViewModelTests
         _state.Password.Should().Be(pass);
         _state.Address.Should().Be(address);
         _state.Port.Should().Be(port);
+    }
+
+    [Fact]
+    public void ShouldUsePort21ByDefaultForFtp()
+    {
+        _provider.Parameters.Returns(new CloudParameters { Type = CloudType.Ftp });
+
+        var model = BuildHostAuthViewModel();
+
+        model.Port.Should().Be("21");
+        _state.Port.Should().Be("21");
     }
 
     private HostAuthViewModel BuildHostAuthViewModel()

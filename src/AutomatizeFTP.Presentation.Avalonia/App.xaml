@@ -1,8 +1,9 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:simple="clr-namespace:Avalonia.Themes.Simple;assembly=Avalonia.Themes.Simple"
              x:Class="AutomatizeFTP.Presentation.Avalonia.App">
     <Application.Styles>
-        <StyleInclude Source="avares://Citrus.Avalonia/Sea.xaml"/>
+        <simple:SimpleTheme />
         <Style>
             <Style.Resources>
                 <GeometryDrawing x:Key="ChevronRight" Brush="{DynamicResource ThemeAccentBrush}" Geometry="F1M6.3901,12.2803L5.3291,11.2193 8.5491,8.0003 5.3291,4.7803 6.3901,3.7193 10.6701,8.0003z" />
@@ -15,5 +16,48 @@
                 <GeometryDrawing x:Key="CloudDrawing" Brush="{DynamicResource ThemeAccentBrush}" Geometry="M16.5,16H8A3,3 0 0,1 5,13A3,3 0 0,1 8,10C8.05,10 8.09,10 8.14,10C8.58,8.28 10.13,7 12,7A4,4 0 0,1 16,11H16.5A2.5,2.5 0 0,1 19,13.5A2.5,2.5 0 0,1 16.5,16M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>    
             </Style.Resources>
         </Style>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
+        <Style Selector="TextBlock.Heading">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="{DynamicResource SurfaceSubtleBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="TextBox:pointerover">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
+        <Style Selector="TextBox:focus">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
+        <Style Selector="Button.primaryAction">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+        </Style>
+        <Style Selector="Button.primaryAction:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+        </Style>
+        <Style Selector="Button.secondaryAction">
+            <Setter Property="Background" Value="{DynamicResource SurfaceSubtleBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
     </Application.Styles>
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://AutomatizeFTP.Presentation.Avalonia/Resources/Strings.en.axaml" />
+                <ResourceInclude Source="avares://AutomatizeFTP.Presentation.Avalonia/Resources/Theme.Light.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

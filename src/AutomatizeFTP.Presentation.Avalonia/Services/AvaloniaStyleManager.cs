@@ -1,6 +1,5 @@
 using System;
 using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Styling;
 
 namespace AutomatizeFTP.Presentation.Avalonia.Services;
 
@@ -8,61 +7,58 @@ public sealed class AvaloniaStyleManager
 {
     public enum Theme
     {
-        Citrus,
-        Sea,
-        Rust,
-        Candy,
-        Magma
+        Light,
+        DarkBlue
     }
 
-    private readonly StyleInclude _magmaStyle = CreateStyle("avares://Citrus.Avalonia/Magma.xaml");
-    private readonly StyleInclude _candyStyle = CreateStyle("avares://Citrus.Avalonia/Candy.xaml");
-    private readonly StyleInclude _citrusStyle = CreateStyle("avares://Citrus.Avalonia/Citrus.xaml");
-    private readonly StyleInclude _rustStyle = CreateStyle("avares://Citrus.Avalonia/Rust.xaml");
-    private readonly StyleInclude _seaStyle = CreateStyle("avares://Citrus.Avalonia/Sea.xaml");
-    private readonly IStyleHost _window;
+    private static readonly Uri LightResources =
+        new("avares://AutomatizeFTP.Presentation.Avalonia/Resources/Theme.Light.axaml");
 
-    public AvaloniaStyleManager(IStyleHost window)
+    private static readonly Uri DarkBlueResources =
+        new("avares://AutomatizeFTP.Presentation.Avalonia/Resources/Theme.DarkBlue.axaml");
+
+    private static void SetThemeResources(Theme theme)
     {
-        _window = window;
-        if (window.Styles.Count == 0)
-            window.Styles.Add(_seaStyle);
-        else window.Styles[0] = _seaStyle;
+        var resources = global::Avalonia.Application.Current?.Resources;
+        if (resources is null)
+            return;
+
+        var source = theme == Theme.Light ? LightResources : DarkBlueResources;
+        var dictionary = new ResourceInclude(source)
+        {
+            Source = source
+        };
+
+        if (resources.MergedDictionaries.Count < 2)
+            resources.MergedDictionaries.Add(dictionary);
+        else
+            resources.MergedDictionaries[1] = dictionary;
     }
 
-    public Theme CurrentTheme { get; private set; } = Theme.Sea;
+    public AvaloniaStyleManager()
+    {
+        SetThemeResources(Theme.Light);
+    }
+
+    public Theme CurrentTheme { get; private set; } = Theme.Light;
+
+    public event EventHandler ThemeChanged;
 
     public void UseNextTheme() =>
-        UseTheme(CurrentTheme switch
-        {
-            Theme.Citrus => Theme.Sea,
-            Theme.Sea => Theme.Rust,
-            Theme.Rust => Theme.Candy,
-            Theme.Candy => Theme.Magma,
-            Theme.Magma => Theme.Citrus,
-            _ => throw new ArgumentOutOfRangeException(nameof(CurrentTheme))
-        });
+        UseTheme(CurrentTheme == Theme.Light ? Theme.DarkBlue : Theme.Light);
 
-    private static StyleInclude CreateStyle(string url)
+    public void UseTheme(string themeName)
     {
-        var self = new Uri("resm:Styles?assembly=Citrus.Avalonia.Sandbox");
-        return new StyleInclude(self)
-        {
-            Source = new Uri(url)
-        };
+        var theme = Enum.TryParse<Theme>(themeName, true, out var parsed)
+            ? parsed
+            : Theme.Light;
+        UseTheme(theme);
     }
 
     private void UseTheme(Theme theme)
     {
         CurrentTheme = theme;
-        _window.Styles[0] = CurrentTheme switch
-        {
-            Theme.Citrus => _citrusStyle,
-            Theme.Sea => _seaStyle,
-            Theme.Rust => _rustStyle,
-            Theme.Candy => _candyStyle,
-            Theme.Magma => _magmaStyle,
-            _ => throw new ArgumentOutOfRangeException(nameof(theme))
-        };
+        SetThemeResources(theme);
+        ThemeChanged?.Invoke(this, EventArgs.Empty);
     }
 }
