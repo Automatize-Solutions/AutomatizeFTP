@@ -15,7 +15,7 @@
             <MenuItem Header="{DynamicResource Unselect}" Command="{Binding Provider.UnselectFile}" />
         </ContextMenu>
     </UserControl.ContextMenu>
-    <Grid MinHeight="48" Margin="14,0" ColumnDefinitions="28,*,130,120,150">
+    <Grid MinHeight="48" Margin="14,0" ColumnDefinitions="28,*,100,90,110">
         <Border Grid.Column="0" Width="28" Height="28" CornerRadius="7" Background="{DynamicResource FolderSurfaceBrush}"
                 IsVisible="{Binding IsFolder}" VerticalAlignment="Center">
             <TextBlock Text="▰" Foreground="{DynamicResource FolderBrush}" FontSize="13"

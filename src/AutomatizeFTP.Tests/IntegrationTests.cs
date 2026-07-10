@@ -23,7 +23,7 @@ public sealed class IntegrationTests
     {
         _state.Clouds.AddOrUpdate(new CloudState
         {
-            Type = CloudType.Local,
+            Type = CloudType.Ftp,
             CreateFolderState = new CreateFolderState
             {
                 Name = "Example",
@@ -32,13 +32,13 @@ public sealed class IntegrationTests
         });
 
         var main = BuildMainViewModel();
-        main.SupportedTypes.Should().Contain(CloudType.Local);
-        main.SelectedSupportedType.Should().Be(CloudType.Local);
+        main.SupportedTypes.Should().NotContain(CloudType.Local);
+        main.SelectedSupportedType.Should().Be(CloudType.Ftp);
         main.Clouds.Should().NotBeEmpty();
         main.Clouds.Count.Should().Be(1);
 
         var provider = main.Clouds[0];
-        provider.Name.Should().Be("Local");
+        provider.Name.Should().Be("Ftp");
         provider.CanInteract.Should().BeFalse();
         provider.Rename.IsVisible.Should().BeFalse();
         provider.Folder.IsVisible.Should().BeTrue();

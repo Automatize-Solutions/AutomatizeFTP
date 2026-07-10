@@ -12,6 +12,8 @@ public interface IMainViewModel : INotifyPropertyChanged
 
     ICloudViewModel SelectedProvider { get; set; }
 
+    ICloudViewModel LocalProvider { get; }
+
     IEnumerable<CloudType> SupportedTypes { get; }
 
     CloudType SelectedSupportedType { get; set; }
@@ -27,6 +29,10 @@ public interface IMainViewModel : INotifyPropertyChanged
     ReactiveCommand<Unit, Unit> Remove { get; }
 
     ReactiveCommand<Unit, Unit> Add { get; }
+
+    ReactiveCommand<Unit, Unit> UploadToRemote { get; }
+
+    ReactiveCommand<Unit, Unit> DownloadToLocal { get; }
 
     bool IsLoading { get; }
 

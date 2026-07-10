@@ -17,8 +17,9 @@ public sealed class CloudFactoryTests
     {
         var factory = new CloudFactory();
         factory.SupportedClouds.Should().NotBeEmpty();
-        factory.SupportedClouds.Should().Contain(CloudType.Local);
+        factory.SupportedClouds.Should().NotContain(CloudType.Local);
         factory.SupportedClouds.Should().Contain(CloudType.Ftp);
+        factory.SupportedClouds.Should().Contain(CloudType.Sftp);
     }
 
     [Fact]

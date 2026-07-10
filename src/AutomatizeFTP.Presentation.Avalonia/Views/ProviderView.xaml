@@ -164,7 +164,7 @@
             <Grid RowDefinitions="38,*">
                 <Border Grid.Row="0" Background="{DynamicResource SurfaceSubtleBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
                         CornerRadius="9,9,0,0" Padding="14,0">
-                    <Grid ColumnDefinitions="28,*,130,120,150">
+                    <Grid ColumnDefinitions="28,*,100,90,110">
                         <TextBlock Grid.Column="0" Text="" />
                         <TextBlock Grid.Column="1" Text="{DynamicResource Name}" FontSize="10" FontWeight="Bold"
                                    Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
@@ -212,14 +212,12 @@
         </Border>
 
         <!-- Actions -->
-        <Grid Grid.Row="3" ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" Margin="0,12,0,12">
+        <Grid Grid.Row="3" ColumnDefinitions="Auto,Auto,*,Auto" Margin="0,12,0,12">
             <Button Grid.Column="0" Classes="action" Content="{DynamicResource NewFolder}" Command="{Binding Folder.Open}" />
             <Button Grid.Column="1" Classes="action" Content="{DynamicResource Rename}" Command="{Binding Rename.Open}" Margin="8,0,0,0" />
             <TextBlock Grid.Column="2" Text="{Binding SelectedFile.Name}" Foreground="{DynamicResource TextSecondaryBrush}"
                        VerticalAlignment="Center" Margin="14,0" TextTrimming="CharacterEllipsis" />
-            <Button Grid.Column="3" Classes="action" Content="{DynamicResource Download}" Command="{Binding DownloadSelectedFile}" />
-            <Button Grid.Column="4" Classes="primaryAction" Content="{DynamicResource Upload}" Command="{Binding UploadToCurrentPath}" Margin="8,0,0,0" />
-            <Button Grid.Column="5" Classes="action" Content="{DynamicResource Delete}" Command="{Binding DeleteSelectedFile}" Margin="8,0,0,0" />
+            <Button Grid.Column="3" Classes="action" Content="{DynamicResource Delete}" Command="{Binding DeleteSelectedFile}" Margin="8,0,0,0" />
         </Grid>
 
         <!-- Transfer queue: intentionally empty until a transfer is running -->

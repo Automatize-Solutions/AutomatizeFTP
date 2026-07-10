@@ -6,42 +6,11 @@
     xmlns:designTime="clr-namespace:AutomatizeFTP.Presentation.DesignTime;assembly=AutomatizeFTP.Presentation"
     x:Class="AutomatizeFTP.Presentation.Avalonia.Views.MainView"
     x:CompileBindings="False"
-    MinHeight="640" MinWidth="980"
+    MinHeight="680" MinWidth="1180"
     FontFamily="Segoe UI, Ubuntu">
     <Design.DataContext>
         <designTime:DesignTimeMainViewModel />
     </Design.DataContext>
-    <UserControl.Resources>
-        <ControlTheme x:Key="ProfileItemTheme" TargetType="ListBoxItem">
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="0,2" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Template">
-                <ControlTemplate>
-                    <ContentPresenter Name="PART_ContentPresenter"
-                                      Content="{TemplateBinding Content}"
-                                      ContentTemplate="{TemplateBinding ContentTemplate}"
-                                      Padding="{TemplateBinding Padding}"
-                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                      Background="{TemplateBinding Background}"
-                                      BorderBrush="{TemplateBinding BorderBrush}"
-                                      BorderThickness="{TemplateBinding BorderThickness}"
-                                      CornerRadius="{TemplateBinding CornerRadius}" />
-                </ControlTemplate>
-            </Setter>
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource HoverSurfaceBrush}" />
-            </Style>
-            <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource AccentSurfaceBrush}" />
-            </Style>
-            <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource AccentSurfaceBrush}" />
-            </Style>
-        </ControlTheme>
-    </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="Button">
             <Setter Property="Margin" Value="0" />
@@ -65,36 +34,24 @@
         <Style Selector="Button.accent:pointerover">
             <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}" />
         </Style>
-        <Style Selector="ComboBox">
-            <Setter Property="Background" Value="{DynamicResource SidebarSurfaceBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource SidebarSurfaceBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}" />
-            <Setter Property="Padding" Value="4,8" />
+        <Style Selector="ComboBox.workspaceSelector">
+            <Setter Property="Background" Value="{DynamicResource SurfaceSubtleBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="Padding" Value="10,7" />
         </Style>
-        <Style Selector="ComboBox:pointerover">
-            <Setter Property="Background" Value="{DynamicResource SidebarSurfaceBrush}" />
+        <Style Selector="ComboBox.workspaceSelector:pointerover">
+            <Setter Property="Background" Value="{DynamicResource HoverSurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         </Style>
-        <Style Selector="ComboBox:focus">
-            <Setter Property="Background" Value="{DynamicResource SidebarSurfaceBrush}" />
+        <Style Selector="ComboBox.workspaceSelector:focus">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         </Style>
-        <Style Selector="ComboBox /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}" />
-        </Style>
-        <Style Selector="ComboBoxItem">
-            <Setter Property="Background" Value="{DynamicResource SidebarSurfaceBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}" />
-        </Style>
-        <Style Selector="ComboBoxItem:pointerover">
-            <Setter Property="Background" Value="{DynamicResource AccentSurfaceBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}" />
-        </Style>
-        <Style Selector="ComboBoxItem:selected">
-            <Setter Property="Background" Value="{DynamicResource AccentSurfaceBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}" />
+        <Style Selector="ComboBox.workspaceSelector /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         </Style>
         <Style Selector="ListBox">
             <Setter Property="Background" Value="Transparent" />
@@ -102,7 +59,7 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid Background="{DynamicResource AppBackgroundBrush}" RowDefinitions="64,*">
+    <Grid Background="{DynamicResource AppBackgroundBrush}" RowDefinitions="64,68,*">
         <!-- Application header -->
         <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
             <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="24,0">
@@ -130,107 +87,77 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1" ColumnDefinitions="260,*">
-            <!-- Connection profiles -->
-            <Border Grid.Column="0" Background="{DynamicResource SidebarBrush}" Padding="18,22,14,16">
-                <Grid RowDefinitions="Auto,Auto,*,Auto">
-                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="4,0,4,18">
-                        <StackPanel>
-                            <TextBlock Text="{DynamicResource Connections}" FontSize="11" FontWeight="Bold"
-                                       Foreground="{DynamicResource TextMutedBrush}" LetterSpacing="1.2" />
-                            <TextBlock Text="{DynamicResource YourFtpProfiles}" FontSize="13" Foreground="{DynamicResource SidebarTextBrush}" Margin="0,5,0,0" />
-                        </StackPanel>
-                        <Button Grid.Column="1" Classes="accent" Content="+" FontSize="18"
-                                Width="34" Height="34" Padding="0" Command="{Binding Add}"
-                                ToolTip.Tip="{DynamicResource AddConnectionTooltip}" />
-                    </Grid>
+        <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="20,0">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
+                    <TextBlock Text="{DynamicResource WorkspaceLabel}" FontSize="11" FontWeight="Bold"
+                               Foreground="{DynamicResource TextMutedBrush}" LetterSpacing="1" />
+                    <TextBlock Text="{DynamicResource SelectConnection}" FontSize="12"
+                               Foreground="{DynamicResource TextSecondaryBrush}" Margin="12,0,0,0" />
+                </StackPanel>
+                <ComboBox Grid.Column="1" Classes="workspaceSelector" Width="300"
+                          ItemsSource="{Binding Clouds, Mode=OneWay}"
+                          SelectedItem="{Binding SelectedProvider, Mode=TwoWay}"
+                          PlaceholderText="{DynamicResource SelectConnection}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="interfaces:ICloudViewModel">
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <ComboBox Grid.Column="2" Classes="workspaceSelector" Width="120" Margin="10,0,0,0"
+                          ItemsSource="{Binding SupportedTypes, Mode=OneWay}"
+                          SelectedItem="{Binding SelectedSupportedType, Mode=TwoWay}" />
+                <Button Grid.Column="3" Classes="accent" Content="{DynamicResource AddConnection}"
+                        Command="{Binding Add}" Margin="10,0,0,0" />
+                <Button Grid.Column="4" Classes="ghost" Content="{DynamicResource RemoveConnection}"
+                        Command="{Binding Remove}" Margin="8,0,0,0" />
+                <ProgressBar Grid.Column="5" Width="90" Height="3" IsIndeterminate="{Binding IsLoading}"
+                             IsVisible="{Binding IsLoading}" Foreground="{DynamicResource AccentBrush}" Margin="16,0,0,0" />
+            </Grid>
+        </Border>
 
-                    <Border Grid.Row="1" Background="{DynamicResource SidebarSurfaceBrush}" CornerRadius="8" Padding="10,1" Margin="0,0,4,14">
-                        <Grid ColumnDefinitions="Auto,*">
-                            <TextBlock Text="＋" Foreground="{DynamicResource AccentHoverBrush}" FontSize="17" VerticalAlignment="Center" />
-                            <ComboBox Grid.Column="1" BorderThickness="0" Background="Transparent"
-                                      Foreground="{DynamicResource SidebarTextBrush}" FontSize="12" Padding="4,8"
-                                      ItemsSource="{Binding SupportedTypes, Mode=OneWay}"
-                                      SelectedItem="{Binding SelectedSupportedType, Mode=TwoWay}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}"
-                                                   Foreground="{DynamicResource SidebarTextBrush}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </Grid>
-                    </Border>
-
-                    <ListBox Grid.Row="2" Classes="profiles" Padding="0" IsVisible="{Binding IsReady}"
-                             ItemContainerTheme="{StaticResource ProfileItemTheme}"
-                             SelectedItem="{Binding SelectedProvider, Mode=TwoWay}"
-                             ItemsSource="{Binding Clouds, Mode=OneWay}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate DataType="interfaces:ICloudViewModel">
-                                <Border Padding="10,11" CornerRadius="8" Margin="0,0,4,0">
-                                    <Grid ColumnDefinitions="34,*">
-                                <Border Width="30" Height="30" CornerRadius="8" Background="{DynamicResource SidebarSurfaceBrush}">
-                                            <TextBlock Text="☁" Foreground="{DynamicResource AccentHoverBrush}" FontSize="16"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Border>
-                                        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" FontSize="13" Foreground="{DynamicResource SidebarTextBrush}"
-                                                       TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
-                                                       Margin="0,3,0,0" TextTrimming="CharacterEllipsis" />
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-
-                    <StackPanel Grid.Row="3" Margin="4,18,4,0">
-                        <Border Background="{DynamicResource SidebarSurfaceBrush}" CornerRadius="8" Padding="10" Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock Text="{DynamicResource QuickTip}" Foreground="{DynamicResource AccentHoverBrush}" FontSize="11" FontWeight="SemiBold" />
-                                <TextBlock Text="{DynamicResource QuickTipText}"
-                                           Foreground="{DynamicResource SidebarMutedBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,5,0,0" />
-                            </StackPanel>
-                        </Border>
-                        <Button Classes="ghost" HorizontalContentAlignment="Left" Foreground="{DynamicResource SidebarMutedBrush}"
-                                Content="{DynamicResource Preferences}" Padding="8" />
-                        <Button Classes="ghost" HorizontalContentAlignment="Left" Foreground="{DynamicResource SidebarMutedBrush}"
-                                Content="{DynamicResource HelpShortcuts}" Padding="8" />
-                    </StackPanel>
-                    <ProgressBar Grid.Row="2" IsIndeterminate="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                                 VerticalAlignment="Top" Height="2" Foreground="{DynamicResource AccentBrush}" />
-                </Grid>
+        <Grid Grid.Row="2" ColumnDefinitions="*,52,*" Background="{DynamicResource AppBackgroundBrush}">
+            <Border Grid.Column="0" Background="{DynamicResource AppBackgroundBrush}">
+                <views:LocalFilesView DataContext="{Binding LocalProvider, Mode=OneWay}" />
             </Border>
 
-            <!-- Workspace -->
-            <Grid Grid.Column="1" Background="{DynamicResource AppBackgroundBrush}">
-                <TransitioningContentControl IsVisible="{Binding WelcomeScreenCollapsed, Mode=OneWay}"
-                                             Margin="22">
-                    <TransitioningContentControl.PageTransition>
-                        <CrossFade Duration="0.25" />
-                    </TransitioningContentControl.PageTransition>
-                    <TransitioningContentControl.Content>
-                        <views:ProviderView DataContext="{Binding SelectedProvider, Mode=OneWay}" />
-                    </TransitioningContentControl.Content>
-                </TransitioningContentControl>
-                <Grid IsVisible="{Binding WelcomeScreenVisible, Mode=OneWay}">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="360">
-                        <Border Width="72" Height="72" CornerRadius="20" Background="{DynamicResource AccentSurfaceBrush}"
-                                HorizontalAlignment="Center">
-                            <TextBlock Text="↔" Foreground="{DynamicResource AccentBrush}" FontSize="42"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <TextBlock Text="{DynamicResource WorkspaceTitle}" FontSize="24" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,22,0,8" />
-                        <TextBlock Text="{DynamicResource WorkspaceText}"
-                                   TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" />
-                        <Button Content="{DynamicResource AddConnection}" Classes="accent" Command="{Binding Add}"
-                                HorizontalAlignment="Center" Margin="0,22,0,0" />
-                    </StackPanel>
-                </Grid>
+            <Grid Grid.Column="1" RowDefinitions="*,Auto,Auto,*" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border Grid.RowSpan="4" Width="1" Background="{DynamicResource BorderBrush}" HorizontalAlignment="Center" />
+                <Button Grid.Row="1" Classes="accent" Content="↑" FontSize="18" Width="36" Height="36"
+                        Padding="0" Command="{Binding UploadToRemote}" ToolTip.Tip="{DynamicResource UploadToRemoteTooltip}" />
+                <Button Grid.Row="2" Classes="ghost" Content="↓" FontSize="18" Width="36" Height="36"
+                        Padding="0" Command="{Binding DownloadToLocal}" ToolTip.Tip="{DynamicResource DownloadToLocalTooltip}" Margin="0,8,0,0" />
             </Grid>
+
+            <Border Grid.Column="2" Background="{DynamicResource AppBackgroundBrush}">
+                <Grid>
+                    <TransitioningContentControl IsVisible="{Binding WelcomeScreenCollapsed, Mode=OneWay}">
+                        <TransitioningContentControl.PageTransition>
+                            <CrossFade Duration="0.25" />
+                        </TransitioningContentControl.PageTransition>
+                        <TransitioningContentControl.Content>
+                            <views:ProviderView DataContext="{Binding SelectedProvider, Mode=OneWay}" />
+                        </TransitioningContentControl.Content>
+                    </TransitioningContentControl>
+                    <Grid IsVisible="{Binding WelcomeScreenVisible, Mode=OneWay}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+                            <Border Width="64" Height="64" CornerRadius="18" Background="{DynamicResource AccentSurfaceBrush}"
+                                    HorizontalAlignment="Center">
+                                <TextBlock Text="↔" Foreground="{DynamicResource AccentBrush}" FontSize="36"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="{DynamicResource WorkspaceTitle}" FontSize="20" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,18,0,8" />
+                            <TextBlock Text="{DynamicResource WorkspaceText}" TextWrapping="Wrap" TextAlignment="Center"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                            <Button Content="{DynamicResource AddConnection}" Classes="accent" Command="{Binding Add}"
+                                    HorizontalAlignment="Center" Margin="0,18,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

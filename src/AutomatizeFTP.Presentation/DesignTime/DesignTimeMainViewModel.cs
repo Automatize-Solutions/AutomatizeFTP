@@ -18,6 +18,8 @@ public class DesignTimeMainViewModel : ReactiveObject, IMainViewModel
 
     public ICloudViewModel SelectedProvider { get; set; } = new DesignTimeCloudViewModel();
 
+    public ICloudViewModel LocalProvider { get; } = new DesignTimeCloudViewModel();
+
     public IEnumerable<CloudType> SupportedTypes { get; } = [CloudType.Ftp, CloudType.Sftp];
 
     public CloudType SelectedSupportedType { get; set; } = CloudType.Sftp;
@@ -33,6 +35,10 @@ public class DesignTimeMainViewModel : ReactiveObject, IMainViewModel
     public ReactiveCommand<Unit, Unit> Remove { get; }
 
     public ReactiveCommand<Unit, Unit> Add { get; }
+
+    public ReactiveCommand<Unit, Unit> UploadToRemote { get; }
+
+    public ReactiveCommand<Unit, Unit> DownloadToLocal { get; }
 
     public bool IsLoading { get; }
 

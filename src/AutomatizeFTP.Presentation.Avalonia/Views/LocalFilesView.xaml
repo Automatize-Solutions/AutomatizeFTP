@@ -1,0 +1,175 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:AutomatizeFTP.Presentation.Avalonia.Views"
+             xmlns:interfaces="clr-namespace:AutomatizeFTP.Presentation.Interfaces;assembly=AutomatizeFTP.Presentation"
+             xmlns:designTime="clr-namespace:AutomatizeFTP.Presentation.DesignTime;assembly=AutomatizeFTP.Presentation"
+             x:Class="AutomatizeFTP.Presentation.Avalonia.Views.LocalFilesView"
+             x:CompileBindings="False">
+    <Design.DataContext>
+        <designTime:DesignTimeCloudViewModel />
+    </Design.DataContext>
+    <UserControl.Resources>
+        <ControlTheme x:Key="LocalBreadcrumbItemTheme" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Padding="{TemplateBinding Padding}"
+                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Background="{TemplateBinding Background}"
+                                      BorderBrush="{TemplateBinding BorderBrush}"
+                                      BorderThickness="{TemplateBinding BorderThickness}"
+                                      CornerRadius="{TemplateBinding CornerRadius}" />
+                </ControlTemplate>
+            </Setter>
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+        </ControlTheme>
+        <ControlTheme x:Key="LocalFileItemTheme" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Padding="{TemplateBinding Padding}"
+                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Background="{TemplateBinding Background}"
+                                      BorderBrush="{TemplateBinding BorderBrush}"
+                                      BorderThickness="{TemplateBinding BorderThickness}"
+                                      CornerRadius="{TemplateBinding CornerRadius}" />
+                </ControlTemplate>
+            </Setter>
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource HoverSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            </Style>
+            <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource AccentSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            </Style>
+            <Style Selector="^:selected">
+                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                <Setter Property="BorderThickness" Value="3,0,0,0" />
+            </Style>
+            <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource AccentSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            </Style>
+            <Style Selector="^:selected:pointerover">
+                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                <Setter Property="BorderThickness" Value="3,0,0,0" />
+            </Style>
+        </ControlTheme>
+    </UserControl.Resources>
+    <UserControl.Styles>
+        <Style Selector="Button">
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="CornerRadius" Value="7" />
+        </Style>
+        <Style Selector="Button.action">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
+        <Style Selector="Button.action:pointerover">
+            <Setter Property="Background" Value="{DynamicResource HoverSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="16,18,10,16">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="2,0,2,14">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource LocalFiles}" FontSize="20" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="{DynamicResource LocalFilesDescription}" FontSize="11"
+                           Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="action" Content="↻" FontSize="18"
+                    Command="{Binding Refresh}" ToolTip.Tip="{DynamicResource RefreshTooltip}" />
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
+            <Button Grid.Column="0" Classes="action" Content="‹" FontSize="22"
+                    Command="{Binding Back}" ToolTip.Tip="{DynamicResource BackTooltip}" />
+            <Border Grid.Column="1" Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                    CornerRadius="7" Margin="8,0" Padding="8,0">
+                <Grid>
+                    <TextBlock Text="{Binding CurrentPath}" IsVisible="{Binding HideBreadCrumbs}"
+                               Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" FontSize="12" />
+                    <ListBox ItemsSource="{Binding BreadCrumbs}" IsVisible="{Binding ShowBreadCrumbs}"
+                             Padding="0" ItemContainerTheme="{StaticResource LocalBreadcrumbItemTheme}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="interfaces:IFolderViewModel">
+                                <views:FolderView DataContext="{Binding}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+            <TextBlock Grid.Column="2" Text="{DynamicResource LocalComputer}" Foreground="{DynamicResource TextMutedBrush}"
+                       FontSize="11" VerticalAlignment="Center" />
+        </Grid>
+
+        <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="9">
+            <Grid RowDefinitions="38,*">
+                <Border Background="{DynamicResource SurfaceSubtleBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="0,0,0,1" CornerRadius="9,9,0,0" Padding="14,0">
+                    <Grid ColumnDefinitions="28,*,100,90,110">
+                        <TextBlock Grid.Column="1" Text="{DynamicResource Name}" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="{DynamicResource Type}" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="3" Text="{DynamicResource Size}" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="4" Text="{DynamicResource Modified}" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+                <ListBox Grid.Row="1" ItemsSource="{Binding Files}" Padding="0"
+                         IsVisible="{Binding IsReady}" SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
+                         ItemContainerTheme="{StaticResource LocalFileItemTheme}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="interfaces:IFileViewModel">
+                            <views:FileView DataContext="{Binding}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="3" ColumnDefinitions="Auto,Auto,Auto,*" Margin="0,10,0,0">
+            <Button Grid.Column="0" Classes="action" Content="{DynamicResource NewFolder}" Command="{Binding Folder.Open}" />
+            <Button Grid.Column="1" Classes="action" Content="{DynamicResource Rename}" Command="{Binding Rename.Open}" Margin="8,0,0,0" />
+            <Button Grid.Column="2" Classes="action" Content="{DynamicResource Delete}" Command="{Binding DeleteSelectedFile}" Margin="8,0,0,0" />
+            <TextBlock Grid.Column="3" Text="{Binding SelectedFile.Name}" Foreground="{DynamicResource TextSecondaryBrush}"
+                       VerticalAlignment="Center" Margin="14,0" TextTrimming="CharacterEllipsis" />
+        </Grid>
+    </Grid>
+</UserControl>

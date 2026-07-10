@@ -26,9 +26,10 @@ public class SuspensionDriversTests
             SelectedSupportedType = CloudType.Sftp
         };
 
-        state.Clouds.AddOrUpdate(new CloudState());
+        state.Clouds.AddOrUpdate(new CloudState { Type = CloudType.Ftp });
         state.Clouds.AddOrUpdate(new CloudState
         {
+            Type = CloudType.Ftp,
             AuthState = new AuthState
             {
                 HostAuthState = new HostAuthState

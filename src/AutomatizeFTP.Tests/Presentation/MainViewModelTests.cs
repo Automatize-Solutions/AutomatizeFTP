@@ -37,7 +37,7 @@ public sealed class MainViewModelTests
     [Fact]
     public void ShouldSelectProviderFromStateWhenProvidersGetLoaded()
     {
-        var provider = new CloudState();
+        var provider = new CloudState { Type = CloudType.Ftp };
         _state.Clouds.AddOrUpdate(provider);
         _state.SelectedProviderId = provider.Id;
 
@@ -55,7 +55,7 @@ public sealed class MainViewModelTests
     [Fact]
     public void ShouldUnselectSelectedProvider()
     {
-        var provider = new CloudState();
+        var provider = new CloudState { Type = CloudType.Ftp };
         _state.Clouds.AddOrUpdate(provider);
         _state.SelectedProviderId = provider.Id;
 
@@ -75,9 +75,9 @@ public sealed class MainViewModelTests
     {
         _state.Clouds.AddOrUpdate(new[]
         {
-            new CloudState { Created = new DateTime(2000, 1, 1, 1, 1, 1) },
-            new CloudState { Created = new DateTime(2015, 1, 1, 1, 1, 1) },
-            new CloudState { Created = new DateTime(2010, 1, 1, 1, 1, 1) }
+            new CloudState { Type = CloudType.Ftp, Created = new DateTime(2000, 1, 1, 1, 1, 1) },
+            new CloudState { Type = CloudType.Ftp, Created = new DateTime(2015, 1, 1, 1, 1, 1) },
+            new CloudState { Type = CloudType.Ftp, Created = new DateTime(2010, 1, 1, 1, 1, 1) }
         });
 
         var model = BuildMainViewModel();
@@ -92,8 +92,8 @@ public sealed class MainViewModelTests
     [Fact]
     public void ShouldUnselectProviderOnceDeleted()
     {
-        var provider = new CloudState();
-        _state.Clouds.AddOrUpdate(new CloudState());
+        var provider = new CloudState { Type = CloudType.Ftp };
+        _state.Clouds.AddOrUpdate(new CloudState { Type = CloudType.Ftp });
         _state.Clouds.AddOrUpdate(provider);
         _state.SelectedProviderId = provider.Id;
 
@@ -113,7 +113,7 @@ public sealed class MainViewModelTests
         var model = BuildMainViewModel();
         model.Clouds.Should().BeEmpty();
         model.SelectedProvider.Should().BeNull();
-        model.SelectedSupportedType = CloudType.Local;
+        model.SelectedSupportedType = CloudType.Ftp;
         model.Add.Execute().Subscribe();
 
         model.Clouds.Should().NotBeEmpty();
@@ -126,19 +126,19 @@ public sealed class MainViewModelTests
         _state.SelectedSupportedType = CloudType.Local;
 
         var model = BuildMainViewModel();
-        model.SelectedSupportedType.Should().Be(CloudType.Local);
+        model.SelectedSupportedType.Should().Be(CloudType.Ftp);
         model.SelectedSupportedType = CloudType.Ftp;
         _state.SelectedSupportedType.Should().Be(CloudType.Ftp);
 
-        model.SelectedSupportedType = CloudType.Local;
-        _state.SelectedSupportedType.Should().Be(CloudType.Local);
+        model.SelectedSupportedType = CloudType.Sftp;
+        _state.SelectedSupportedType.Should().Be(CloudType.Sftp);
     }
 
     [Fact]
     public void ShouldSaveUserSelectionToStateObject()
     {
-        _state.Clouds.AddOrUpdate(new CloudState());
-        _state.Clouds.AddOrUpdate(new CloudState());
+        _state.Clouds.AddOrUpdate(new CloudState { Type = CloudType.Ftp });
+        _state.Clouds.AddOrUpdate(new CloudState { Type = CloudType.Ftp });
 
         var model = BuildMainViewModel();
         model.SelectedProvider.Should().BeNull();

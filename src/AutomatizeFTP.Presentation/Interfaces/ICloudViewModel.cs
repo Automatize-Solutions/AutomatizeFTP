@@ -39,6 +39,10 @@ public interface ICloudViewModel : INotifyPropertyChanged
 
     ReactiveCommand<string, string> SetPath { get; }
 
+    Task UploadFileFromAsync(string sourcePath, string name);
+
+    Task DownloadFileToAsync(string sourcePath, string destinationPath, string name);
+
     bool IsCurrentPathEmpty { get; }
 
     bool IsLoading { get; }

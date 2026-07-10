@@ -6,6 +6,8 @@ using AutomatizeFTP.Presentation.Avalonia.Views;
 using AutomatizeFTP.Presentation.Infrastructure;
 using AutomatizeFTP.Presentation.ViewModels;
 using AutomatizeFTP.Services;
+using AutomatizeFTP.Services.Interfaces;
+using AutomatizeFTP.Services.Models;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -37,10 +39,10 @@ public class App : Application
         var window = new Window
         {
             Title = "AutomatizeFTP · FTP Workspace",
-            Height = 760,
-            Width = 1180,
-            MinHeight = 640,
-            MinWidth = 980,
+            Height = 820,
+            Width = 1400,
+            MinHeight = 680,
+            MinWidth = 1180,
         };
 
         window.Content = CreateView(window);
@@ -91,22 +93,30 @@ public class App : Application
     {
         var main = _state;
         var scheduler = AvaloniaScheduler.Instance;
-        return new MainViewModel(
-            main,
-            new CloudFactory(),
-            (state, provider) => new CloudViewModel(
-                state,
-                owner => new CreateFolderViewModel(state.CreateFolderState, owner, provider, scheduler),
-                owner => new RenameFileViewModel(state.RenameFileState, owner, provider, scheduler),
-                (file, owner) => new FileViewModel(owner, file),
-                (folder, owner) => new FolderViewModel(owner, folder),
-                new AuthViewModel(
-                    new HostAuthViewModel(state.AuthState.HostAuthState, provider, scheduler),
-                    provider,
-                    scheduler),
-                new AvaloniaFileManager(window),
+        var factory = new CloudFactory();
+
+        CloudViewModel CreateCloudViewModel(CloudState state, ICloud provider) => new(
+            state,
+            owner => new CreateFolderViewModel(state.CreateFolderState, owner, provider, scheduler),
+            owner => new RenameFileViewModel(state.RenameFileState, owner, provider, scheduler),
+            (file, owner) => new FileViewModel(owner, file),
+            (folder, owner) => new FolderViewModel(owner, folder),
+            new AuthViewModel(
+                new HostAuthViewModel(state.AuthState.HostAuthState, provider, scheduler),
                 provider,
                 scheduler),
+            new AvaloniaFileManager(window),
+            provider,
             scheduler);
+
+        var localState = new CloudState { Type = CloudType.Local };
+        var localProvider = CreateCloudViewModel(localState, factory.CreateCloud(localState.Parameters));
+
+        return new MainViewModel(
+            main,
+            factory,
+            CreateCloudViewModel,
+            scheduler,
+            localProvider);
     }
 }

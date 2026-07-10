@@ -10,7 +10,6 @@ public sealed class CloudFactory : ICloudFactory
     {
         SupportedClouds = supported ?? new[]
         {
-            CloudType.Local,
             CloudType.Ftp,
             CloudType.Sftp
         };

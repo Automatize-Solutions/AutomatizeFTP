@@ -17,7 +17,7 @@ public class MainState
         // internal <>z__ReadOnlyArray, which TypeNameHandling.All persists as $type
         // and Newtonsoft cannot construct when reading the state back.
         get => Clouds.Items.ToArray();
-        set => Clouds.AddOrUpdate(value);
+        set => Clouds.AddOrUpdate(value?.Where(cloud => cloud.Type != CloudType.Local) ?? Enumerable.Empty<CloudState>());
     }
 
     [DataMember]

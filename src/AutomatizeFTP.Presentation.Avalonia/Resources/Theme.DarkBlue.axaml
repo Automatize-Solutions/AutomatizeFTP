@@ -8,10 +8,6 @@
   <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E6F1FF" />
   <SolidColorBrush x:Key="TextSecondaryBrush" Color="#B8CBE5" />
   <SolidColorBrush x:Key="TextMutedBrush" Color="#88A4C7" />
-  <SolidColorBrush x:Key="SidebarBrush" Color="#04132E" />
-  <SolidColorBrush x:Key="SidebarSurfaceBrush" Color="#0B2348" />
-  <SolidColorBrush x:Key="SidebarTextBrush" Color="#F1F7FF" />
-  <SolidColorBrush x:Key="SidebarMutedBrush" Color="#B8CBE5" />
   <SolidColorBrush x:Key="AccentBrush" Color="#60A5FA" />
   <SolidColorBrush x:Key="AccentHoverBrush" Color="#93C5FD" />
   <SolidColorBrush x:Key="AccentSurfaceBrush" Color="#153A70" />

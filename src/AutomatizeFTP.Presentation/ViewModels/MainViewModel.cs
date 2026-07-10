@@ -22,9 +22,15 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
     private readonly ObservableAsPropertyHelper<bool> _isReady;
     private readonly ICloudFactory _factory;
 
-    public MainViewModel(MainState state, ICloudFactory factory, CloudViewModelFactory createViewModel, IScheduler scheduler)
+    public MainViewModel(
+        MainState state,
+        ICloudFactory factory,
+        CloudViewModelFactory createViewModel,
+        IScheduler scheduler,
+        ICloudViewModel localProvider = null)
     {
         _factory = factory;
+        LocalProvider = localProvider;
         Refresh = ReactiveCommand.Create(state.Clouds.Refresh, outputScheduler: scheduler);
 
         _isLoading = Refresh
@@ -39,6 +45,7 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
         state
             .Clouds
             .Connect()
+            .Filter(cloud => cloud.Type != CloudType.Local)
             .Transform(ps => createViewModel(ps, factory.CreateCloud(ps.Parameters)))
             .Sort(SortExpressionComparer<ICloudViewModel>.Descending(x => x.Created))
             .ObserveOn(scheduler)
@@ -56,7 +63,7 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
 
         var canAddProvider = this
             .WhenAnyValue(x => x.SelectedSupportedType)
-            .Select(type => Enum.IsDefined(typeof(CloudType), type));
+            .Select(type => SupportedTypes.Contains(type));
 
         Add = ReactiveCommand.Create(
             () => state.Clouds.AddOrUpdate(new CloudState { Type = SelectedSupportedType }),
@@ -100,9 +107,56 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
             .Select(provider => provider?.Id ?? Guid.Empty)
             .Subscribe(id => state.SelectedProviderId = id);
 
-        SelectedSupportedType = state.SelectedSupportedType ?? SupportedTypes.First();
+        SelectedSupportedType = state.SelectedSupportedType is { } selectedType && SupportedTypes.Contains(selectedType)
+            ? selectedType
+            : SupportedTypes.First();
         this.WhenAnyValue(x => x.SelectedSupportedType)
             .Subscribe(type => state.SelectedSupportedType = type);
+
+        var localSelection = LocalProvider is null
+            ? Observable.Return<IFileViewModel>(null)
+            : LocalProvider.WhenAnyValue(x => x.SelectedFile);
+        var remoteSelection = this.WhenAnyValue(x => x.SelectedProvider);
+
+        var canUpload = Observable.CombineLatest(
+                remoteSelection,
+                localSelection,
+                (remote, local) => remote is not null &&
+                                   remote.Auth.IsAuthenticated &&
+                                   remote.CanInteract &&
+                                   local?.IsFile == true)
+            .ObserveOn(scheduler);
+
+        UploadToRemote = ReactiveCommand.CreateFromTask(
+            async () =>
+            {
+                var source = LocalProvider.SelectedFile;
+                await SelectedProvider.UploadFileFromAsync(source.Path, source.Name).ConfigureAwait(false);
+                SelectedProvider.Refresh.Execute().Subscribe();
+            },
+            canUpload,
+            outputScheduler: scheduler);
+
+        var canDownload = Observable.CombineLatest(
+                remoteSelection,
+                localSelection,
+                (remote, local) => remote is not null &&
+                                   remote.Auth.IsAuthenticated &&
+                                   remote.CanInteract &&
+                                   remote.SelectedFile?.IsFile == true &&
+                                   local is not null &&
+                                   !string.IsNullOrWhiteSpace(LocalProvider.CurrentPath))
+            .ObserveOn(scheduler);
+
+        DownloadToLocal = ReactiveCommand.CreateFromTask(
+            async () =>
+            {
+                var source = SelectedProvider.SelectedFile;
+                await LocalProvider.DownloadFileToAsync(source.Path, LocalProvider.CurrentPath, source.Name).ConfigureAwait(false);
+                LocalProvider.Refresh.Execute().Subscribe();
+            },
+            canDownload,
+            outputScheduler: scheduler);
     }
 
     [Reactive]
@@ -119,7 +173,13 @@ public sealed partial class MainViewModel : ReactiveObject, IMainViewModel
 
     public ReactiveCommand<Unit, Unit> Add { get; }
 
+    public ReactiveCommand<Unit, Unit> UploadToRemote { get; }
+
+    public ReactiveCommand<Unit, Unit> DownloadToLocal { get; }
+
     public ReadOnlyObservableCollection<ICloudViewModel> Clouds => _providers;
+
+    public ICloudViewModel LocalProvider { get; }
 
     public IEnumerable<CloudType> SupportedTypes => _factory.SupportedClouds;
 

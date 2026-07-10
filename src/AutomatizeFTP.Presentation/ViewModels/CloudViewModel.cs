@@ -331,6 +331,19 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     public ReactiveCommand<string, string> SetPath { get; }
 
+    public async Task UploadFileFromAsync(string sourcePath, string name)
+    {
+        await using var stream = File.OpenRead(sourcePath);
+        await _cloud.UploadFile(CurrentPath, stream, name).ConfigureAwait(false);
+    }
+
+    public async Task DownloadFileToAsync(string sourcePath, string destinationPath, string name)
+    {
+        var targetPath = Path.Combine(destinationPath, name);
+        await using var stream = File.Create(targetPath);
+        await _cloud.DownloadFile(sourcePath, stream).ConfigureAwait(false);
+    }
+
     private static string NormalizeInitialPath(string path, ICloud cloud)
     {
         if (cloud.Parameters?.Type != CloudType.Ftp || string.IsNullOrWhiteSpace(path))
