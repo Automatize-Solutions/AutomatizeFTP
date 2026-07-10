@@ -139,6 +139,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .DistinctUntilChanged()
             .Log(this, $"Current path changed in {cloud.Name}")
             .ToProperty(this, x => x.CurrentPath, initialPath, scheduler: _scheduler);
+        this.RaisePropertyChanged(nameof(CurrentPath));
 
         var initialBreadCrumbs = CreatePathBreadCrumbs(initialPath, folderFactory);
         var breadCrumbRequests = this

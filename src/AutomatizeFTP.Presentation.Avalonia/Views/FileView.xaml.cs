@@ -2,6 +2,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using AutomatizeFTP.Presentation.Interfaces;
+using Avalonia.Controls;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
@@ -26,7 +27,15 @@ public sealed partial class FileView : ReactiveUserControl<IFileViewModel>
             ContextMenu
                 .Events()
                 .Opening
-                .Subscribe(args => ViewModel.Provider.SetSelectedFiles(new[] { ViewModel }))
+                .Subscribe(args =>
+                {
+                    ContextMenu.DataContext = ViewModel;
+                    foreach (var menuItem in ContextMenu.Items.OfType<MenuItem>())
+                        menuItem.DataContext = ViewModel;
+                    CreateFolderMenuItem.Command = ViewModel.Provider.Folder.Open;
+                    CreateFolderAndEnterMenuItem.Command = ViewModel.Provider.Folder.OpenAndEnter;
+                    ViewModel.Provider.SetSelectedFiles(new[] { ViewModel });
+                })
                 .DisposeWith(disposables);
         });
     }

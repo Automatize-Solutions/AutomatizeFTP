@@ -12,7 +12,8 @@
             <MenuItem Header="{DynamicResource Open}" Command="{Binding Provider.Open}" />
             <MenuItem Header="{DynamicResource Download}" Command="{Binding Provider.DownloadSelectedFile}" />
             <Separator />
-            <MenuItem Header="{DynamicResource NewFolder}" Command="{Binding Provider.Folder.Open}" />
+            <MenuItem x:Name="CreateFolderMenuItem" Header="{DynamicResource CreateFolder}" />
+            <MenuItem x:Name="CreateFolderAndEnterMenuItem" Header="{DynamicResource CreateFolderAndEnter}" />
             <MenuItem Header="{DynamicResource Rename}" Command="{Binding Provider.Rename.Open}" />
             <MenuItem Header="{DynamicResource Delete}" Command="{Binding Provider.DeleteSelectedFile}" />
             <Separator />

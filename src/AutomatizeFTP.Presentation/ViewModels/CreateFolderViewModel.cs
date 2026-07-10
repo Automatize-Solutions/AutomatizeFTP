@@ -19,6 +19,7 @@ public sealed partial class CreateFolderViewModel : ReactiveValidationObject, IC
     private readonly ObservableAsPropertyHelper<bool> _hasErrorMessage;
     private readonly ObservableAsPropertyHelper<bool> _isLoading;
     private readonly ObservableAsPropertyHelper<string> _path;
+    private bool _enterAfterCreate;
 
     public CreateFolderViewModel(CreateFolderState state, ICloudViewModel owner, ICloud provider, IScheduler scheduler)
     {
@@ -61,15 +62,21 @@ public sealed partial class CreateFolderViewModel : ReactiveValidationObject, IC
             .WhenAnyValue(x => x.IsVisible)
             .Select(visible => visible);
 
-        Open = ReactiveCommand.Create(() => { }, canOpen, outputScheduler: scheduler);
+        Open = ReactiveCommand.Create(() => { _enterAfterCreate = false; }, canOpen, outputScheduler: scheduler);
+        OpenAndEnter = ReactiveCommand.Create(() => { _enterAfterCreate = true; }, canOpen, outputScheduler: scheduler);
         Close = ReactiveCommand.Create(() => { }, canClose, outputScheduler: scheduler);
 
         Open.Select(unit => true)
+            .Merge(OpenAndEnter.Select(unit => true))
             .Merge(Close.Select(unit => false))
             .Subscribe(visible => IsVisible = visible);
 
-        Close.Subscribe(x => Name = string.Empty);
-        Create.InvokeCommand(Close);
+        Close.Subscribe(x =>
+        {
+            Name = string.Empty;
+            _enterAfterCreate = false;
+        });
+        Create.Subscribe(_ => CompleteCreate(owner));
 
         _hasErrorMessage = Create
             .ThrownExceptions
@@ -113,6 +120,8 @@ public sealed partial class CreateFolderViewModel : ReactiveValidationObject, IC
 
     public ReactiveCommand<Unit, Unit> Open { get; }
 
+    public ReactiveCommand<Unit, Unit> OpenAndEnter { get; }
+
     protected override void Dispose(bool disposing)
     {
         if (disposing)
@@ -124,5 +133,19 @@ public sealed partial class CreateFolderViewModel : ReactiveValidationObject, IC
         }
 
         base.Dispose(disposing);
+    }
+
+    private void CompleteCreate(ICloudViewModel owner)
+    {
+        var folderPath = _enterAfterCreate
+            ? System.IO.Path.Combine(Path, Name)
+            : null;
+        _enterAfterCreate = false;
+
+        Close.Execute().Subscribe(_ =>
+        {
+            if (folderPath is not null)
+                owner.SetPath.Execute(folderPath).Subscribe();
+        });
     }
 }

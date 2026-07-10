@@ -93,6 +93,26 @@ public sealed class CreateFolderViewModelTests
     }
 
     [Fact]
+    public void ShouldEnterCreatedFolderWhenRequested()
+    {
+        _model.CanInteract.Returns(true);
+        _model.CurrentPath.Returns(Separator);
+        _provider.CanCreateFolder.Returns(true);
+
+        var paths = new List<string>();
+        var setPath = ReactiveCommand.Create<string, string>(path => path);
+        setPath.Subscribe(paths.Add);
+        _model.SetPath.Returns(setPath);
+
+        var model = BuildCreateFolderViewModel();
+        model.OpenAndEnter.Execute().Subscribe();
+        model.Name = "Foo";
+        model.Create.Execute().Subscribe();
+
+        paths.Should().Contain(Path.Combine(Separator, "Foo"));
+    }
+
+    [Fact]
     public void ShouldUpdateValidationsForProperties()
     {
         _model.CurrentPath.Returns(Separator);

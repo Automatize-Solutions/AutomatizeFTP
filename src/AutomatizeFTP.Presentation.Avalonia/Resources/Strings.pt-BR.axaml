@@ -69,6 +69,7 @@
   <x:String x:Key="PasswordPlaceholder">Senha...</x:String>
   <x:String x:Key="Login">Entrar</x:String>
   <x:String x:Key="CreateFolder">Criar pasta</x:String>
+  <x:String x:Key="CreateFolderAndEnter">Criar pasta e entrar nela</x:String>
   <x:String x:Key="Close">Fechar</x:String>
   <x:String x:Key="CreatingFolderAt">Criando uma nova pasta em:</x:String>
   <x:String x:Key="FolderNamePrompt">Informe o nome da nova pasta:</x:String>

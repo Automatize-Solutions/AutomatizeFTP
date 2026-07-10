@@ -181,7 +181,13 @@
                     <controls:FileExplorerListBox x:Name="FilesList" Classes="files" Padding="0" ItemsSource="{Binding Files}"
                              ItemContainerTheme="{StaticResource FileItemTheme}"
                              IsVisible="{Binding IsReady}" ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                             SelectionMode="Multiple" Focusable="True">
+                             SelectionMode="Multiple" Focusable="True" Background="Transparent">
+                        <controls:FileExplorerListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem x:Name="CreateFolderMenuItem" Header="{DynamicResource CreateFolder}" />
+                                <MenuItem x:Name="CreateFolderAndEnterMenuItem" Header="{DynamicResource CreateFolderAndEnter}" />
+                            </ContextMenu>
+                        </controls:FileExplorerListBox.ContextMenu>
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="interfaces:IFileViewModel">
                                 <views:FileView DataContext="{Binding}" />

@@ -69,6 +69,7 @@
   <x:String x:Key="PasswordPlaceholder">Password...</x:String>
   <x:String x:Key="Login">Login</x:String>
   <x:String x:Key="CreateFolder">Create folder</x:String>
+  <x:String x:Key="CreateFolderAndEnter">Create folder and enter it</x:String>
   <x:String x:Key="Close">Close</x:String>
   <x:String x:Key="CreatingFolderAt">Creating a new folder at:</x:String>
   <x:String x:Key="FolderNamePrompt">Enter the new folder name:</x:String>

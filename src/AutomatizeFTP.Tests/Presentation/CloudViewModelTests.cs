@@ -149,6 +149,26 @@ public sealed class CloudViewModelTests
     }
 
     [Fact]
+    public void ShouldRefreshContentsWhenEnteringCreatedFolder()
+    {
+        var folderPath = Path.Combine(Separator, "teste");
+        _auth.IsAuthenticated.Returns(true);
+        _cloud.CanCreateFolder.Returns(true);
+        _cloud.InitialPath.Returns(Separator);
+        _cloud.GetFiles(Arg.Any<string>()).Returns(Task.FromResult<IEnumerable<FileModel>>(Array.Empty<FileModel>()));
+        _cloud.GetBreadCrumbs(Arg.Any<string>()).Returns(Task.FromResult<IEnumerable<FolderModel>>(Array.Empty<FolderModel>()));
+        _cloud.CreateFolder(Separator, "teste").Returns(Task.CompletedTask);
+
+        var model = BuildProviderViewModelWithCreateFolder();
+        model.Folder.OpenAndEnter.Execute().Subscribe();
+        model.Folder.Name = "teste";
+        model.Folder.Create.Execute().Subscribe();
+
+        model.CurrentPath.Should().Be(folderPath);
+        _cloud.Received(1).GetFiles(folderPath);
+    }
+
+    [Fact]
     public void ShouldNotPublishNullCurrentPathValues()
     {
         var file = new FileModel { Name = "foo", Path = Separator + "foo", IsFolder = true };
@@ -242,6 +262,21 @@ public sealed class CloudViewModelTests
         return new CloudViewModel(
             _state,
             x => _folder,
+            x => _rename,
+            (x, y) => new FileViewModel(y, x),
+            (x, y) => new FolderViewModel(y, x),
+            _auth,
+            _files,
+            _cloud,
+            scheduler);
+    }
+
+    private CloudViewModel BuildProviderViewModelWithCreateFolder()
+    {
+        var scheduler = ImmediateScheduler.Instance;
+        return new CloudViewModel(
+            _state,
+            owner => new CreateFolderViewModel(_state.CreateFolderState, owner, _cloud, scheduler),
             x => _rename,
             (x, y) => new FileViewModel(y, x),
             (x, y) => new FolderViewModel(y, x),

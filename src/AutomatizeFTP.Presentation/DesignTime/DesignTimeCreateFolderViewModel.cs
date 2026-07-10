@@ -27,4 +27,6 @@ public class DesignTimeCreateFolderViewModel : ReactiveValidationObject, ICreate
     public ReactiveCommand<Unit, Unit> Close { get; }
 
     public ReactiveCommand<Unit, Unit> Open { get; }
+
+    public ReactiveCommand<Unit, Unit> OpenAndEnter { get; }
 }

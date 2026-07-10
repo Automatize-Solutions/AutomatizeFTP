@@ -45,6 +45,21 @@ public sealed class IntegrationTests
         provider.Folder.Name.Should().Be("Example");
     }
 
+    [Fact]
+    public void ShouldEnableCreateFolderCommandsAtInitialPath()
+    {
+        _state.Clouds.AddOrUpdate(new CloudState
+        {
+            Type = CloudType.Ftp
+        });
+
+        var main = BuildMainViewModel();
+        var provider = main.Clouds[0];
+
+        provider.Folder.Open.CanExecute().Should().BeTrue();
+        provider.Folder.OpenAndEnter.CanExecute().Should().BeTrue();
+    }
+
     private IMainViewModel BuildMainViewModel()
     {
         var scheduler = ImmediateScheduler.Instance;

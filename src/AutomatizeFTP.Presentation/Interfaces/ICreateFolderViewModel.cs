@@ -28,4 +28,6 @@ public interface ICreateFolderViewModel :
     ReactiveCommand<Unit, Unit> Close { get; }
 
     ReactiveCommand<Unit, Unit> Open { get; }
+
+    ReactiveCommand<Unit, Unit> OpenAndEnter { get; }
 }
