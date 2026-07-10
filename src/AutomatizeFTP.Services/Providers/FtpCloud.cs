@@ -104,6 +104,14 @@ public sealed class FtpCloud : ICloud
         await connection.Disconnect().ConfigureAwait(false);
     }
 
+    public async Task MoveFile(string sourcePath, string destinationPath)
+    {
+        using var connection = _factory();
+        await connection.Connect().ConfigureAwait(false);
+        await connection.Rename(sourcePath, destinationPath).ConfigureAwait(false);
+        await connection.Disconnect().ConfigureAwait(false);
+    }
+
     public async Task Delete(string path, bool isFolder)
     {
         using var connection = _factory();

@@ -23,7 +23,7 @@ public sealed class FileViewModel : ReactiveObject, IFileViewModel
 
     public string Modified => _file.Modified?.ToString(CultureInfo.InvariantCulture) ?? "A long time ago";
 
-    public string Size => _file.Size == 0 ? "Unknown" : _file.Size.ByteSizeToString();
+    public string Size => _file.Size == 0 ? string.Empty : _file.Size.ByteSizeToString();
 
     public bool IsSelected
     {

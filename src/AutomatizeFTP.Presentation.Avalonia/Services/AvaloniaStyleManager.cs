@@ -8,13 +8,13 @@ public sealed class AvaloniaStyleManager
     public enum Theme
     {
         Light,
-        DarkBlue
+        Dark
     }
 
     private static readonly Uri LightResources =
         new("avares://AutomatizeFTP.Presentation.Avalonia/Resources/Theme.Light.axaml");
 
-    private static readonly Uri DarkBlueResources =
+    private static readonly Uri DarkResources =
         new("avares://AutomatizeFTP.Presentation.Avalonia/Resources/Theme.DarkBlue.axaml");
 
     private static void SetThemeResources(Theme theme)
@@ -23,7 +23,7 @@ public sealed class AvaloniaStyleManager
         if (resources is null)
             return;
 
-        var source = theme == Theme.Light ? LightResources : DarkBlueResources;
+        var source = theme == Theme.Light ? LightResources : DarkResources;
         var dictionary = new ResourceInclude(source)
         {
             Source = source
@@ -45,11 +45,14 @@ public sealed class AvaloniaStyleManager
     public event EventHandler ThemeChanged;
 
     public void UseNextTheme() =>
-        UseTheme(CurrentTheme == Theme.Light ? Theme.DarkBlue : Theme.Light);
+        UseTheme(CurrentTheme == Theme.Light ? Theme.Dark : Theme.Light);
 
     public void UseTheme(string themeName)
     {
-        var theme = Enum.TryParse<Theme>(themeName, true, out var parsed)
+        var normalizedThemeName = string.Equals(themeName, "DarkBlue", StringComparison.OrdinalIgnoreCase)
+            ? nameof(Theme.Dark)
+            : themeName;
+        var theme = Enum.TryParse<Theme>(normalizedThemeName, true, out var parsed)
             ? parsed
             : Theme.Light;
         UseTheme(theme);

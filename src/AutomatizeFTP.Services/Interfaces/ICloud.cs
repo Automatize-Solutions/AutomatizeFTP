@@ -35,6 +35,8 @@ public interface ICloud
 
     Task RenameFile(string path, string name);
 
+    Task MoveFile(string sourcePath, string destinationPath);
+
     Task Delete(string path, bool isFolder);
 
     Task HostAuth(string address, int port, string login, string password);

@@ -24,7 +24,7 @@ namespace AutomatizeFTP.Presentation.Avalonia;
 
 public class App : Application
 {
-    private readonly NewtonsoftJsonSuspensionDriver _driver = new("appstate.json");
+    private readonly NewtonsoftJsonSuspensionDriver _driver = new(GetStateFilePath());
     private MainState _state;
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
@@ -60,8 +60,14 @@ public class App : Application
     {
         var view = new MainView();
         var styles = new AvaloniaStyleManager();
+        styles.ThemeChanged += (_, _) =>
+        {
+            _state.Theme = styles.CurrentTheme.ToString();
+            UpdateThemeButton(view, styles.CurrentTheme);
+            SaveState();
+        };
         styles.UseTheme(_state.Theme);
-        styles.ThemeChanged += (_, _) => _state.Theme = styles.CurrentTheme.ToString();
+        UpdateThemeButton(view, styles.CurrentTheme);
         view.SwitchThemeButton.Click += (_, _) => styles.UseNextTheme();
         view.LanguageButton.Click += (_, _) => LocalizationManager.Instance.ToggleLanguage();
         LocalizationManager.Instance.LanguageChanged += (_, _) => _state.Language = LocalizationManager.Instance.CurrentLanguage;
@@ -140,6 +146,15 @@ public class App : Application
     private static string GetResource(string key) =>
         GetResourceObject(key)?.ToString() ?? key;
 
+    private static void UpdateThemeButton(MainView view, AvaloniaStyleManager.Theme currentTheme)
+    {
+        var isLight = currentTheme == AvaloniaStyleManager.Theme.Light;
+        view.ThemeButtonIcon.Text = isLight ? "☾" : "☀";
+        view.ThemeButtonLabel.Text = isLight
+            ? nameof(AvaloniaStyleManager.Theme.Dark)
+            : nameof(AvaloniaStyleManager.Theme.Light);
+    }
+
     private static object GetResourceObject(string key)
     {
         var resources = Current?.Resources;
@@ -147,6 +162,26 @@ public class App : Application
                resources.TryGetResource(key, ThemeVariant.Default, out var resource)
             ? resource
             : null;
+    }
+
+    private static string GetStateFilePath()
+    {
+        var applicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var stateDirectory = string.IsNullOrWhiteSpace(applicationData)
+            ? AppContext.BaseDirectory
+            : Path.Combine(applicationData, "AutomatizeFTP");
+
+        Directory.CreateDirectory(stateDirectory);
+        var statePath = Path.Combine(stateDirectory, "appstate.json");
+        var legacyPath = Path.GetFullPath("appstate.json");
+
+        if (!File.Exists(statePath) && File.Exists(legacyPath) &&
+            !string.Equals(statePath, legacyPath, StringComparison.OrdinalIgnoreCase))
+        {
+            File.Copy(legacyPath, statePath);
+        }
+
+        return statePath;
     }
 
     private MainState LoadState()

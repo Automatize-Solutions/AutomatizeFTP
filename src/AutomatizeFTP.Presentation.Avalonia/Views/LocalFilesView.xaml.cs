@@ -33,13 +33,25 @@ public sealed partial class LocalFilesView : ReactiveUserControl<ICloudViewModel
     {
         var payload = args.Payload;
         var target = ViewModel;
-        if (target is null || payload.SourceProvider.Id == target.Id)
+        if (target is null)
             return;
 
         try
         {
-            foreach (var item in payload.Items)
-                await payload.SourceProvider.DownloadFileToAsync(item.Path, target.CurrentPath, item.Name, item.IsFolder);
+            var destinationPath = args.TargetFolder?.Path ?? target.CurrentPath;
+            if (payload.SourceProvider.Id == target.Id)
+            {
+                if (args.TargetFolder is null)
+                    return;
+
+                foreach (var item in payload.Items)
+                    await target.MoveFileToAsync(item.Path, destinationPath, item.Name);
+            }
+            else
+            {
+                foreach (var item in payload.Items)
+                    await payload.SourceProvider.DownloadFileToAsync(item.Path, destinationPath, item.Name, item.IsFolder);
+            }
 
             await target.Refresh.Execute().ToTask();
         }

@@ -5,6 +5,8 @@ namespace AutomatizeFTP.Presentation.DesignTime;
 
 public class DesignTimeFolderViewModel : ReactiveObject, IFolderViewModel
 {
+    public ICloudViewModel Provider { get; }
+
     public DesignTimeFolderViewModel()
     {
         Name = "home";

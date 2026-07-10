@@ -106,6 +106,12 @@ public sealed class LocalCloud : ICloud
         else File.Move(path, newName);
     });
 
+    public Task MoveFile(string sourcePath, string destinationPath) => Task.Run(() =>
+    {
+        if (IsDirectory(sourcePath)) Directory.Move(sourcePath, destinationPath);
+        else File.Move(sourcePath, destinationPath);
+    });
+
     public async Task UploadFile(
         string to,
         Stream from,

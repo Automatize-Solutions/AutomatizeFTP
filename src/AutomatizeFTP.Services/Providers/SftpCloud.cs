@@ -125,6 +125,14 @@ public sealed class SftpCloud : ICloud
         connection.Disconnect();
     });
 
+    public Task MoveFile(string sourcePath, string destinationPath) => Task.Run(() =>
+    {
+        using var connection = _factory();
+        connection.Connect();
+        connection.RenameFile(sourcePath, destinationPath);
+        connection.Disconnect();
+    });
+
     public Task Delete(string path, bool isFolder) => Task.Run(() =>
     {
         using var connection = _factory();

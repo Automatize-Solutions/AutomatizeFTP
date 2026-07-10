@@ -3,7 +3,6 @@
   <x:String x:Key="AppTitle">AutomatizeFTP · Espaço de trabalho FTP</x:String>
   <x:String x:Key="AppName">AutomatizeFTP</x:String>
   <x:String x:Key="AppSubtitle">ESPAÇO DE TRABALHO FTP</x:String>
-  <x:String x:Key="Theme">☼  Tema</x:String>
   <x:String x:Key="LanguageButton">🌐  Inglês</x:String>
   <x:String x:Key="AddConnectionTooltip">Adicionar conexão</x:String>
   <x:String x:Key="NewProfile">Novo perfil</x:String>
@@ -33,10 +32,12 @@
   <x:String x:Key="LoadError">Não foi possível carregar os arquivos</x:String>
   <x:String x:Key="LoadErrorText">Verifique a conexão e tente atualizar novamente.</x:String>
   <x:String x:Key="NewFolder">＋  Nova pasta</x:String>
-  <x:String x:Key="Rename">✎  Renomear</x:String>
-  <x:String x:Key="Download">↓  Baixar</x:String>
+  <x:String x:Key="Rename">Renomear</x:String>
+  <x:String x:Key="Download">Baixar</x:String>
   <x:String x:Key="Upload">↑  Enviar</x:String>
   <x:String x:Key="Delete">Excluir</x:String>
+  <x:String x:Key="DeleteConfirmationTitle">Confirmar exclusão</x:String>
+  <x:String x:Key="DeleteConfirmationPrompt">Tem certeza de que deseja excluir &quot;{0}&quot;?</x:String>
   <x:String x:Key="TransferQueue">Fila de transferências</x:String>
   <x:String x:Key="ClearTransferQueue">✕  Limpar fila</x:String>
   <x:String x:Key="ClearTransferQueueTitle">Limpar fila de transferências</x:String>
@@ -57,8 +58,6 @@
   <x:String x:Key="SuccessfulTransfersEmpty">As transferências concluídas aparecerão aqui.</x:String>
   <x:String x:Key="Folder">Pasta</x:String>
   <x:String x:Key="File">Arquivo</x:String>
-  <x:String x:Key="Open">Abrir</x:String>
-  <x:String x:Key="Unselect">Desmarcar</x:String>
   <x:String x:Key="RemoteHostAuth">Autenticação do host remoto</x:String>
   <x:String x:Key="AddressPrompt">Informe o endereço e a porta do host:</x:String>
   <x:String x:Key="UsernamePrompt">Informe seu nome de usuário:</x:String>

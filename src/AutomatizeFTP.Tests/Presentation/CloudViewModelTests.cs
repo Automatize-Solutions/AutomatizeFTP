@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using AutomatizeFTP.Presentation.AppState;
 using AutomatizeFTP.Presentation.Interfaces;
 using AutomatizeFTP.Presentation.ViewModels;
@@ -166,6 +167,17 @@ public sealed class CloudViewModelTests
 
         model.CurrentPath.Should().Be(folderPath);
         _cloud.Received(1).GetFiles(folderPath);
+    }
+
+    [Fact]
+    public async Task ShouldMoveFileToDestinationFolder()
+    {
+        _cloud.Parameters.Returns(new CloudParameters { Type = CloudType.Ftp });
+
+        var model = BuildProviderViewModel();
+        await model.MoveFileToAsync("/source/file.txt", "/target", "file.txt");
+
+        await _cloud.Received(1).MoveFile("/source/file.txt", "/target/file.txt");
     }
 
     [Fact]

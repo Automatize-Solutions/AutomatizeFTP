@@ -141,15 +141,19 @@
             <Grid RowDefinitions="38,*">
                 <Border Background="{DynamicResource SurfaceSubtleBrush}" BorderBrush="{DynamicResource BorderBrush}"
                         BorderThickness="0,0,0,1" CornerRadius="9,9,0,0" Padding="14,0">
-                    <Grid ColumnDefinitions="28,*,100,90,110">
+                    <Grid ColumnDefinitions="28,*,110,110,150" ColumnSpacing="10">
                         <TextBlock Grid.Column="1" Text="{DynamicResource Name}" FontSize="10" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                                   Foreground="{DynamicResource TextMutedBrush}" Margin="10,0,8,0"
+                                   VerticalAlignment="Center" />
                         <TextBlock Grid.Column="2" Text="{DynamicResource Type}" FontSize="10" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                                   Foreground="{DynamicResource TextMutedBrush}" Margin="10,0,8,0"
+                                   VerticalAlignment="Center" />
                         <TextBlock Grid.Column="3" Text="{DynamicResource Size}" FontSize="10" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                                   Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Stretch"
+                                   TextAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="4" Text="{DynamicResource Modified}" FontSize="10" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                                   Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Stretch"
+                                   TextAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center" />
                     </Grid>
                 </Border>
                 <Grid Grid.Row="1">
@@ -160,8 +164,16 @@
                              Focusable="True" Background="Transparent">
                         <controls:FileExplorerListBox.ContextMenu>
                             <ContextMenu>
-                                <MenuItem x:Name="CreateFolderMenuItem" Header="{DynamicResource CreateFolder}" />
-                                <MenuItem x:Name="CreateFolderAndEnterMenuItem" Header="{DynamicResource CreateFolderAndEnter}" />
+                                <MenuItem x:Name="CreateFolderMenuItem" Header="{DynamicResource CreateFolder}">
+                                    <MenuItem.Icon>
+                                        <TextBlock Text="▰" Width="16" HorizontalAlignment="Center" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem x:Name="CreateFolderAndEnterMenuItem" Header="{DynamicResource CreateFolderAndEnter}">
+                                    <MenuItem.Icon>
+                                        <TextBlock Text="↳" Width="16" HorizontalAlignment="Center" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
                             </ContextMenu>
                         </controls:FileExplorerListBox.ContextMenu>
                         <ListBox.ItemTemplate>

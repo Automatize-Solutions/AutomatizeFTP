@@ -30,6 +30,19 @@
         <Style Selector="Button.ghost:pointerover">
             <Setter Property="Background" Value="{DynamicResource HoverSurfaceBrush}" />
         </Style>
+        <Style Selector="Button.headerToggle">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Button.headerToggle:pointerover">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Button.headerToggle:focus">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
         <Style Selector="Button.accent">
             <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
@@ -119,9 +132,14 @@
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="18,0,0,0">
-                    <Button x:Name="LanguageButton" Classes="ghost" Content="{DynamicResource LanguageButton}" />
-                    <Button x:Name="SwitchThemeButton" Classes="ghost"
-                            Content="{DynamicResource Theme}" Margin="6,0,0,0" />
+                    <Button x:Name="LanguageButton" Classes="ghost headerToggle" Content="{DynamicResource LanguageButton}" />
+                    <Button x:Name="SwitchThemeButton" Classes="ghost headerToggle" Margin="6,0,0,0">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock x:Name="ThemeButtonIcon" Text="☾" FontSize="15"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="ThemeButtonLabel" Text="Dark" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>

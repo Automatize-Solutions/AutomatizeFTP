@@ -3,7 +3,6 @@
   <x:String x:Key="AppTitle">AutomatizeFTP · FTP Workspace</x:String>
   <x:String x:Key="AppName">AutomatizeFTP</x:String>
   <x:String x:Key="AppSubtitle">FTP WORKSPACE</x:String>
-  <x:String x:Key="Theme">☼  Theme</x:String>
   <x:String x:Key="LanguageButton">🌐  PT-BR</x:String>
   <x:String x:Key="AddConnectionTooltip">Add connection</x:String>
   <x:String x:Key="NewProfile">New profile</x:String>
@@ -33,10 +32,12 @@
   <x:String x:Key="LoadError">Unable to load files</x:String>
   <x:String x:Key="LoadErrorText">Check the connection and try refreshing again.</x:String>
   <x:String x:Key="NewFolder">＋  New folder</x:String>
-  <x:String x:Key="Rename">✎  Rename</x:String>
-  <x:String x:Key="Download">↓  Download</x:String>
+  <x:String x:Key="Rename">Rename</x:String>
+  <x:String x:Key="Download">Download</x:String>
   <x:String x:Key="Upload">↑  Upload</x:String>
   <x:String x:Key="Delete">Delete</x:String>
+  <x:String x:Key="DeleteConfirmationTitle">Confirm deletion</x:String>
+  <x:String x:Key="DeleteConfirmationPrompt">Are you sure you want to delete &quot;{0}&quot;?</x:String>
   <x:String x:Key="TransferQueue">Transfer queue</x:String>
   <x:String x:Key="ClearTransferQueue">✕  Clear queue</x:String>
   <x:String x:Key="ClearTransferQueueTitle">Clear transfer queue</x:String>
@@ -57,8 +58,6 @@
   <x:String x:Key="SuccessfulTransfersEmpty">Successful transfers will appear here.</x:String>
   <x:String x:Key="Folder">Folder</x:String>
   <x:String x:Key="File">File</x:String>
-  <x:String x:Key="Open">Open</x:String>
-  <x:String x:Key="Unselect">Unselect</x:String>
   <x:String x:Key="RemoteHostAuth">Remote host authentication</x:String>
   <x:String x:Key="AddressPrompt">Enter the host address and port:</x:String>
   <x:String x:Key="UsernamePrompt">Enter your username:</x:String>

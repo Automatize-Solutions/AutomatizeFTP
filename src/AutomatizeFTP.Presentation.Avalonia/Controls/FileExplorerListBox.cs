@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutomatizeFTP.Presentation.Avalonia.Views;
@@ -28,6 +29,7 @@ public sealed class FileExplorerListBox : ListBox
         AddHandler(PointerPressedEvent, HandlePointerPressed, pointerStrategies, handledEventsToo: true);
         AddHandler(PointerMovedEvent, HandlePointerMoved, pointerStrategies, handledEventsToo: true);
         AddHandler(PointerReleasedEvent, HandlePointerReleased, pointerStrategies, handledEventsToo: true);
+        AddHandler(InputElement.DoubleTappedEvent, HandleDoubleTapped, RoutingStrategies.Bubble, handledEventsToo: true);
         DragDrop.SetAllowDrop(this, true);
         DragDrop.AddDragOverHandler(this, OnDragOver);
         DragDrop.AddDropHandler(this, OnDrop);
@@ -103,6 +105,29 @@ public sealed class FileExplorerListBox : ListBox
     private static IFileViewModel FindFile(ICloudViewModel viewModel, string prefix) =>
         viewModel.Files.FirstOrDefault(item => item.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 
+    private static bool CanDrop(
+        FileDragPayload payload,
+        ICloudViewModel target,
+        IFileViewModel targetFolder)
+    {
+        if (payload is null || target is null)
+            return false;
+
+        if (payload.SourceProvider.Id != target.Id)
+            return true;
+
+        return targetFolder is not null &&
+               payload.Items.All(item => !IsSameOrDescendant(item.Path, targetFolder.Path));
+    }
+
+    private static bool IsSameOrDescendant(string sourcePath, string targetPath)
+    {
+        var source = sourcePath.Replace('\\', '/').TrimEnd('/');
+        var target = targetPath.Replace('\\', '/').TrimEnd('/');
+        return string.Equals(source, target, StringComparison.OrdinalIgnoreCase) ||
+               target.StartsWith(source + "/", StringComparison.OrdinalIgnoreCase);
+    }
+
     private void HandlePointerPressed(object sender, PointerPressedEventArgs args)
     {
         if (args.GetCurrentPoint(this).Properties.PointerUpdateKind != PointerUpdateKind.LeftButtonPressed)
@@ -126,15 +151,15 @@ public sealed class FileExplorerListBox : ListBox
             return;
 
         var current = point.Position;
-        var isInsideList = Bounds.Contains(current);
-        if (isInsideList)
+        var hasPassedDragThreshold = Math.Abs(current.X - start.X) >= DragThreshold ||
+                                     Math.Abs(current.Y - start.Y) >= DragThreshold;
+        if (!hasPassedDragThreshold)
         {
-            SelectRangeAt(current);
+            if (Bounds.Contains(current))
+                SelectRangeAt(current);
+
             return;
         }
-
-        if (Math.Abs(current.X - start.X) < DragThreshold && Math.Abs(current.Y - start.Y) < DragThreshold)
-            return;
 
         _dragStarted = true;
         var dragStartEvent = _pointerStartEvent;
@@ -152,6 +177,18 @@ public sealed class FileExplorerListBox : ListBox
         _pointerStartEvent = null;
         _dragStarted = false;
         args.Pointer.Capture(null);
+    }
+
+    private void HandleDoubleTapped(object sender, TappedEventArgs args)
+    {
+        var viewModel = GetViewModel(this);
+        var file = FindFileViewModel(args.Source) ?? viewModel?.SelectedFile;
+        if (viewModel is null || file?.IsFolder != true)
+            return;
+
+        viewModel.SetSelectedFiles(new[] { file });
+        viewModel.SetPath.Execute(Path.Combine(viewModel.CurrentPath, file.Name)).Subscribe();
+        args.Handled = true;
     }
 
     private void OnSelectionChanged(object sender, SelectionChangedEventArgs args)
@@ -183,24 +220,38 @@ public sealed class FileExplorerListBox : ListBox
     {
         var payload = FileDragPayload.From(args.DataTransfer);
         var target = GetViewModel(this);
-        args.DragEffects = payload is not null &&
-                           target is not null &&
-                           payload.SourceProvider.Id != target.Id
-            ? DragDropEffects.Copy
+        var targetFolder = GetDropTarget(args);
+        var canDrop = CanDrop(payload, target, targetFolder);
+        var isMove = canDrop && payload.SourceProvider.Id == target.Id;
+
+        args.DragEffects = canDrop
+            ? isMove ? DragDropEffects.Move : DragDropEffects.Copy
             : DragDropEffects.None;
         args.Handled = true;
     }
 
     private void OnDrop(object sender, DragEventArgs args)
     {
-        var payload = FileDragPayload.Take(args.DataTransfer);
+        var payload = FileDragPayload.From(args.DataTransfer);
         var target = GetViewModel(this);
-        if (payload is null || target is null || payload.SourceProvider.Id == target.Id)
+        var targetFolder = GetDropTarget(args);
+        if (!CanDrop(payload, target, targetFolder))
             return;
 
-        args.DragEffects = DragDropEffects.Copy;
+        payload = FileDragPayload.Take(args.DataTransfer);
+        if (payload is null)
+            return;
+
+        var isMove = payload.SourceProvider.Id == target.Id;
+        args.DragEffects = isMove ? DragDropEffects.Move : DragDropEffects.Copy;
         args.Handled = true;
-        FilesDropped?.Invoke(this, new FileExplorerDropEventArgs(payload));
+        FilesDropped?.Invoke(this, new FileExplorerDropEventArgs(payload, targetFolder));
+    }
+
+    private IFileViewModel GetDropTarget(DragEventArgs args)
+    {
+        var target = FindFileViewModel(this.GetVisualAt(args.GetPosition(this)));
+        return target?.IsFolder == true ? target : null;
     }
 
     private async Task StartDragAsync(PointerPressedEventArgs startEvent, IPointer pointer)
@@ -222,7 +273,7 @@ public sealed class FileExplorerListBox : ListBox
 
         try
         {
-            await DragDrop.DoDragDropAsync(startEvent, transfer, DragDropEffects.Copy);
+            await DragDrop.DoDragDropAsync(startEvent, transfer, DragDropEffects.Copy | DragDropEffects.Move);
         }
         finally
         {
@@ -233,7 +284,9 @@ public sealed class FileExplorerListBox : ListBox
     }
 }
 
-internal sealed class FileExplorerDropEventArgs(FileDragPayload payload) : EventArgs
+internal sealed class FileExplorerDropEventArgs(FileDragPayload payload, IFileViewModel targetFolder) : EventArgs
 {
     public FileDragPayload Payload { get; } = payload;
+
+    public IFileViewModel TargetFolder { get; } = targetFolder;
 }

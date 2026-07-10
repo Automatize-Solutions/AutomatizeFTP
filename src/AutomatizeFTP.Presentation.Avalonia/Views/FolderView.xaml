@@ -36,7 +36,8 @@
     </UserControl.Styles>
     <Grid>
       <StackPanel Orientation="Horizontal">
-        <Button Classes="breadcrumb"
+        <Button x:Name="FolderButton"
+          Classes="breadcrumb"
                 Command="{Binding Provider.SetPath}"
                 CommandParameter="{Binding FullPath}"
                 ToolTip.Tip="{Binding FullPath}">

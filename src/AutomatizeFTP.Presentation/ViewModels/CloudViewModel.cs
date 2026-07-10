@@ -360,7 +360,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     public DateTime Created => _cloud.Created;
 
-    public string Size => _cloud.Size?.ByteSizeToString() ?? "Unknown";
+    public string Size => _cloud.Size?.ByteSizeToString() ?? string.Empty;
 
     public string Description => $"{_cloud.Name} file system.";
 
@@ -382,13 +382,25 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     public ReactiveCommand<string, string> SetPath { get; }
 
-    public Task UploadFileFromAsync(string sourcePath, string name, bool isFolder)
+    public Task UploadFileFromAsync(string sourcePath, string name, bool isFolder, string destinationPath = null)
     {
+        destinationPath ??= CurrentPath;
         Func<CancellationToken, IProgress<double>, Task> transfer = (cancellationToken, progress) =>
-            UploadFileFromCoreAsync(sourcePath, name, isFolder, cancellationToken, progress);
+            UploadFileFromCoreAsync(sourcePath, destinationPath, name, isFolder, cancellationToken, progress);
         return _transferQueue is null
             ? transfer(CancellationToken.None, null)
-            : _transferQueue.RunAsync(name, "Uploading", sourcePath, CurrentPath, transfer);
+            : _transferQueue.RunAsync(name, "Uploading", sourcePath, destinationPath, transfer);
+    }
+
+    public Task MoveFileToAsync(string sourcePath, string destinationPath, string name)
+    {
+        destinationPath ??= CurrentPath;
+        var targetPath = CombineDestinationPath(destinationPath, name);
+        Func<CancellationToken, IProgress<double>, Task> transfer = (cancellationToken, progress) =>
+            _cloud.MoveFile(sourcePath, targetPath);
+        return _transferQueue is null
+            ? transfer(CancellationToken.None, null)
+            : _transferQueue.RunAsync(name, "Moving", sourcePath, targetPath, transfer);
     }
 
     public void ReportError(Exception exception)
@@ -443,8 +455,14 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
         }
     }
 
+    private string CombineDestinationPath(string path, string name) =>
+        _cloud.Parameters?.Type is CloudType.Ftp or CloudType.Sftp
+            ? CombineRemotePath(path, name)
+            : Path.Combine(path, name);
+
     private async Task UploadFileFromCoreAsync(
         string sourcePath,
+        string destinationPath,
         string name,
         bool isFolder,
         CancellationToken cancellationToken,
@@ -452,12 +470,12 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
     {
         if (isFolder)
         {
-            await UploadDirectoryAsync(sourcePath, CurrentPath, name, cancellationToken, progress).ConfigureAwait(false);
+            await UploadDirectoryAsync(sourcePath, destinationPath, name, cancellationToken, progress).ConfigureAwait(false);
             return;
         }
 
         await using var stream = File.OpenRead(sourcePath);
-        await _cloud.UploadFile(CurrentPath, stream, name, progress, cancellationToken).ConfigureAwait(false);
+        await _cloud.UploadFile(destinationPath, stream, name, progress, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task DownloadFileToCoreAsync(

@@ -9,18 +9,35 @@
     </Design.DataContext>
     <UserControl.ContextMenu>
         <ContextMenu>
-            <MenuItem Header="{DynamicResource Open}" Command="{Binding Provider.Open}" />
-            <MenuItem Header="{DynamicResource Download}" Command="{Binding Provider.DownloadSelectedFile}" />
+            <MenuItem Header="{DynamicResource Download}" Command="{Binding Provider.DownloadSelectedFile}">
+                <MenuItem.Icon>
+                    <TextBlock Text="↓" Width="16" HorizontalAlignment="Center" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="{DynamicResource Rename}" Command="{Binding Provider.Rename.Open}">
+                <MenuItem.Icon>
+                    <TextBlock Text="✎" Width="16" HorizontalAlignment="Center" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem x:Name="DeleteMenuItem" Header="{DynamicResource Delete}">
+                <MenuItem.Icon>
+                    <TextBlock Text="✕" Width="16" HorizontalAlignment="Center" />
+                </MenuItem.Icon>
+            </MenuItem>
             <Separator />
-            <MenuItem x:Name="CreateFolderMenuItem" Header="{DynamicResource CreateFolder}" />
-            <MenuItem x:Name="CreateFolderAndEnterMenuItem" Header="{DynamicResource CreateFolderAndEnter}" />
-            <MenuItem Header="{DynamicResource Rename}" Command="{Binding Provider.Rename.Open}" />
-            <MenuItem Header="{DynamicResource Delete}" Command="{Binding Provider.DeleteSelectedFile}" />
-            <Separator />
-            <MenuItem Header="{DynamicResource Unselect}" Command="{Binding Provider.UnselectFile}" />
+            <MenuItem x:Name="CreateFolderMenuItem" Header="{DynamicResource CreateFolder}">
+                <MenuItem.Icon>
+                    <TextBlock Text="▰" Width="16" HorizontalAlignment="Center" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem x:Name="CreateFolderAndEnterMenuItem" Header="{DynamicResource CreateFolderAndEnter}">
+                <MenuItem.Icon>
+                    <TextBlock Text="↳" Width="16" HorizontalAlignment="Center" />
+                </MenuItem.Icon>
+            </MenuItem>
         </ContextMenu>
     </UserControl.ContextMenu>
-    <Grid MinHeight="48" Margin="14,0" ColumnDefinitions="28,*,100,90,110">
+    <Grid MinHeight="48" Margin="14,0" ColumnDefinitions="28,*,110,110,150" ColumnSpacing="10">
         <Border Grid.Column="0" Width="28" Height="28" CornerRadius="7" Background="{DynamicResource FolderSurfaceBrush}"
                 IsVisible="{Binding IsFolder}" VerticalAlignment="Center">
             <TextBlock Text="▰" Foreground="{DynamicResource FolderBrush}" FontSize="13"
@@ -33,13 +50,17 @@
         </Border>
         <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12"
                    VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="10,0,8,0" />
-        <TextBlock Grid.Column="2" Text="{DynamicResource Folder}" IsVisible="{Binding IsFolder}"
-                   Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
-        <TextBlock Grid.Column="2" Text="{DynamicResource File}" IsVisible="{Binding IsFile}"
-                   Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" />
+         <TextBlock Grid.Column="2" Text="{DynamicResource Folder}" IsVisible="{Binding IsFolder}"
+                 Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="10,0,8,0"
+                 VerticalAlignment="Center" />
+         <TextBlock Grid.Column="2" Text="{DynamicResource File}" IsVisible="{Binding IsFile}"
+                 Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="10,0,8,0"
+                 VerticalAlignment="Center" />
         <TextBlock Grid.Column="3" Text="{Binding Size}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
-                   VerticalAlignment="Center" />
+                 HorizontalAlignment="Stretch" TextAlignment="Right" Margin="0,0,10,0"
+                 VerticalAlignment="Center" />
         <TextBlock Grid.Column="4" Text="{Binding Modified}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
-                   VerticalAlignment="Center" />
+                 HorizontalAlignment="Stretch" TextAlignment="Right" Margin="0,0,10,0"
+                 VerticalAlignment="Center" />
     </Grid>
 </UserControl>
