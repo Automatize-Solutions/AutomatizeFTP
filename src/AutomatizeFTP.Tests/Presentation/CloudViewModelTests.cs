@@ -112,6 +112,27 @@ public sealed class CloudViewModelTests
     }
 
     [Fact]
+    public void BackShouldPreserveForwardSlashesOnRemotePaths()
+    {
+        var folder = new FileModel { Name = "cassol", Path = "/Uploads/cassol", IsFolder = true };
+        _cloud.GetFiles("/Uploads").Returns(Enumerable.Repeat(folder, 1));
+        _auth.IsAuthenticated.Returns(true);
+        _cloud.InitialPath.Returns("/");
+
+        var model = BuildProviderViewModel();
+        model.SetPath.Execute("/Uploads").Subscribe();
+        model.SelectedFile = model.Files.First();
+        model.Open.Execute().Subscribe();
+
+        model.CurrentPath.Should().Be("/Uploads/cassol");
+        model.Back.Execute().Subscribe();
+
+        // On Windows Path.GetDirectoryName would return "\Uploads",
+        // breaking breadcrumbs for remote providers that split on '/'.
+        model.CurrentPath.Should().Be("/Uploads");
+    }
+
+    [Fact]
     public void ShouldRefreshContentOfCurrentPathWhenFileIsUploaded()
     {
         _cloud.InitialPath.Returns(Separator);

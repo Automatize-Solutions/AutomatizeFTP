@@ -27,7 +27,7 @@ public sealed class SftpCloud : ICloud
 
     public DateTime Created => Parameters.Created;
 
-    public string InitialPath => Path.DirectorySeparatorChar.ToString();
+    public string InitialPath => "/";
 
     public IObservable<bool> IsAuthorized => _isAuthorized;
 
@@ -110,7 +110,7 @@ public sealed class SftpCloud : ICloud
     {
         using var connection = _factory();
         connection.Connect();
-        var directory = Path.Combine(path, name);
+        var directory = RemotePath.Combine(path, name);
         connection.CreateDirectory(directory);
         connection.Disconnect();
     });
@@ -119,8 +119,8 @@ public sealed class SftpCloud : ICloud
     {
         using var connection = _factory();
         connection.Connect();
-        var directoryName = Path.GetDirectoryName(path);
-        var newName = Path.Combine(directoryName, name);
+        var directoryName = RemotePath.GetDirectory(path);
+        var newName = RemotePath.Combine(directoryName, name);
         connection.RenameFile(path, newName);
         connection.Disconnect();
     });
@@ -153,7 +153,7 @@ public sealed class SftpCloud : ICloud
             {
                 using var connection = _factory();
                 connection.Connect();
-                var path = Path.Combine(to, name);
+                var path = RemotePath.Combine(to, name);
                 var totalBytes = from.CanSeek ? from.Length : 0;
                 connection.UploadFile(@from, path, true, bytesTransferred =>
                 {

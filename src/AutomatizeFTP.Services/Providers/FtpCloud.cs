@@ -7,7 +7,7 @@ namespace AutomatizeFTP.Services.Providers;
 
 public sealed class FtpCloud : ICloud
 {
-    private static readonly string[] PathSeparators = { "/" };
+    private static readonly string[] PathSeparators = { "/", "\\" };
     private readonly ISubject<bool> _isAuthorized = new ReplaySubject<bool>();
     private Func<AsyncFtpClient> _factory;
 
@@ -89,7 +89,7 @@ public sealed class FtpCloud : ICloud
     {
         using var connection = _factory();
         await connection.Connect().ConfigureAwait(false);
-        var directory = CombineRemotePath(path, name);
+        var directory = RemotePath.Combine(path, name);
         await connection.CreateDirectory(directory).ConfigureAwait(false);
         await connection.Disconnect().ConfigureAwait(false);
     }
@@ -98,8 +98,8 @@ public sealed class FtpCloud : ICloud
     {
         using var connection = _factory();
         await connection.Connect().ConfigureAwait(false);
-        var directoryName = GetRemoteDirectory(path);
-        var newName = CombineRemotePath(directoryName, name);
+        var directoryName = RemotePath.GetDirectory(path);
+        var newName = RemotePath.Combine(directoryName, name);
         await connection.Rename(path, newName).ConfigureAwait(false);
         await connection.Disconnect().ConfigureAwait(false);
     }
@@ -137,7 +137,7 @@ public sealed class FtpCloud : ICloud
     {
         using var connection = _factory();
         await connection.Connect(cancellationToken).ConfigureAwait(false);
-        var path = CombineRemotePath(to, name);
+        var path = RemotePath.Combine(to, name);
         IProgress<FtpProgress> ftpProgress = progress is null
             ? null
             : new Progress<FtpProgress>(value => progress.Report(value.Progress));
@@ -158,14 +158,5 @@ public sealed class FtpCloud : ICloud
             : new Progress<FtpProgress>(value => progress.Report(value.Progress));
         await connection.DownloadStream(to, @from, 0, ftpProgress, cancellationToken).ConfigureAwait(false);
         await connection.Disconnect(cancellationToken).ConfigureAwait(false);
-    }
-
-    private static string CombineRemotePath(string path, string name) =>
-        $"{path.TrimEnd('/')}/{name.TrimStart('/')}";
-
-    private static string GetRemoteDirectory(string path)
-    {
-        var separator = path.LastIndexOf('/');
-        return separator <= 0 ? "/" : path[..separator];
     }
 }

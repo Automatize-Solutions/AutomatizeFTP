@@ -126,7 +126,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .CombineLatest(Refresh.IsExecuting, canInteract, (valid, busy, ci) => valid && ci && !busy);
 
         Back = ReactiveCommand.Create(
-            () => Path.GetDirectoryName(CurrentPath),
+            () => GetParentPath(CurrentPath),
             canCurrentPathGoBack,
             outputScheduler: _scheduler);
 
@@ -430,6 +430,16 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     private static string CombineRemotePath(string path, string name) =>
         $"{path.TrimEnd('/', '\\')}/{name.TrimStart('/', '\\')}";
+
+    // Path.GetDirectoryName rewrites separators to '\' on Windows, which corrupts
+    // remote '/'-based paths (FTP/SFTP); keep the original separator style instead.
+    private static string GetParentPath(string path)
+    {
+        var parent = Path.GetDirectoryName(path);
+        return parent != null && path.Contains('/')
+            ? parent.Replace('\\', '/')
+            : parent;
+    }
 
     private static string NormalizeInitialPath(string path, ICloud cloud)
     {
