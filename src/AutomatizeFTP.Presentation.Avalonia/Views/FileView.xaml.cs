@@ -1,5 +1,4 @@
 using System;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
@@ -19,9 +18,10 @@ public sealed partial class FileView : ReactiveUserControl<IFileViewModel>
         {
             this.Events()
                 .DoubleTapped
+                .Where(args => ViewModel.IsFolder)
                 .Do(args => ViewModel.Provider.SelectedFile = ViewModel)
-                .Select(args => Unit.Default)
-                .InvokeCommand(this, x => x.ViewModel.Provider.Open)
+                .Select(args => Path.Combine(ViewModel.Provider.CurrentPath, ViewModel.Name))
+                .InvokeCommand(this, x => x.ViewModel.Provider.SetPath)
                 .DisposeWith(disposables);
 
             ContextMenu

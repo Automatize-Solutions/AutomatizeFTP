@@ -224,9 +224,10 @@ public sealed class CloudViewModelTests
 
         var model = BuildProviderViewModel();
 
-        model.ShowBreadCrumbs.Should().BeFalse();
-        model.HideBreadCrumbs.Should().BeTrue();
-        model.BreadCrumbs.Should().BeNullOrEmpty();
+        model.ShowBreadCrumbs.Should().BeTrue();
+        model.HideBreadCrumbs.Should().BeFalse();
+        model.BreadCrumbs.Should().NotBeNullOrEmpty();
+        model.BreadCrumbs.Should().HaveCount(1);
         model.Refresh.Execute().Subscribe();
 
         model.ShowBreadCrumbs.Should().BeTrue();

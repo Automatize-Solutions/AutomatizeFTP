@@ -24,4 +24,6 @@ public class DesignTimeFileViewModel(DesignTimeCloudViewModel provider) : Reacti
     public string Path { get; } = "/home/path/file";
 
     public string Size { get; } = "42 KB";
+
+    public bool IsSelected { get; set; }
 }

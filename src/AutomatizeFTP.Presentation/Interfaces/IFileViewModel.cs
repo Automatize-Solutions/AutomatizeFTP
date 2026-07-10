@@ -17,4 +17,6 @@ public interface IFileViewModel : INotifyPropertyChanged
     string Path { get; }
 
     string Size { get; }
+
+    bool IsSelected { get; set; }
 }

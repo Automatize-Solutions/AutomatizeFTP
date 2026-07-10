@@ -80,6 +80,9 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .Where(items => Files == null || !items.SequenceEqual(Files))
             .ToProperty(this, x => x.Files, scheduler: _scheduler);
 
+        this.WhenAnyValue(x => x.SelectedFile)
+            .Subscribe(UpdateFileSelection);
+
         _isLoading = Refresh
             .IsExecuting
             .ToProperty(this, x => x.IsLoading, scheduler: _scheduler);
@@ -105,7 +108,7 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
         // does not exist yet, and CurrentPath still reads null, which Where would
         // swallow -- leaving CombineLatest without a first value and Back disabled
         // forever. Seed the pipeline with the very value the helper starts from.
-        var initialPath = state.CurrentPath ?? cloud.InitialPath;
+        var initialPath = NormalizeInitialPath(state.CurrentPath ?? cloud.InitialPath, cloud);
 
         var canCurrentPathGoBack = this
             .WhenAnyValue(x => x.CurrentPath)
@@ -129,19 +132,29 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .Log(this, $"Current path changed in {cloud.Name}")
             .ToProperty(this, x => x.CurrentPath, initialPath, scheduler: _scheduler);
 
-        var getBreadCrumbs = ReactiveCommand.CreateFromTask(
-            () => cloud.GetBreadCrumbs(CurrentPath),
-            outputScheduler: _scheduler);
+        var initialBreadCrumbs = CreatePathBreadCrumbs(initialPath, folderFactory);
+        var breadCrumbRequests = this
+            .WhenAnyValue(x => x.CurrentPath)
+            .Where(path => path != null)
+            .Select(path => Observable
+                .Return(CreatePathBreadCrumbs(path, folderFactory))
+                .Concat(Observable
+                    .FromAsync(() => cloud.GetBreadCrumbs(path))
+                    .Select(items => items != null && items.Any()
+                        ? items.Select(folder => folderFactory(folder, this)).ToList()
+                        : CreatePathBreadCrumbs(path, folderFactory)))
+                .Catch<IEnumerable<IFolderViewModel>, Exception>(_ =>
+                    Observable.Empty<IEnumerable<IFolderViewModel>>()))
+            .Switch()
+            .Publish()
+            .RefCount();
 
-        _breadCrumbs = getBreadCrumbs
-            .Where(items => items != null && items.Any())
-            .Select(items => items.Select(folder => folderFactory(folder, this)))
-            .ToProperty(this, x => x.BreadCrumbs, scheduler: _scheduler);
+        _breadCrumbs = breadCrumbRequests
+            .ToProperty(this, x => x.BreadCrumbs, initialBreadCrumbs, scheduler: _scheduler);
 
-        _showBreadCrumbs = getBreadCrumbs
-            .ThrownExceptions
-            .Select(exception => false)
-            .Merge(getBreadCrumbs.Select(items => items != null && items.Any()))
+        _showBreadCrumbs = breadCrumbRequests
+            .Select(items => items.Any())
+            .StartWith(initialBreadCrumbs.Any())
             .ObserveOn(_scheduler)
             .ToProperty(this, x => x.ShowBreadCrumbs, scheduler: _scheduler);
 
@@ -149,11 +162,6 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .WhenAnyValue(x => x.ShowBreadCrumbs)
             .Select(show => !show)
             .ToProperty(this, x => x.HideBreadCrumbs, scheduler: _scheduler);
-
-        this.WhenAnyValue(x => x.CurrentPath, x => x.IsReady)
-            .Where(x => x.Item1 != null && x.Item2)
-            .Select(_ => Unit.Default)
-            .InvokeCommand(getBreadCrumbs);
 
         this.WhenAnyValue(x => x.CurrentPath)
             .Skip(1)
@@ -245,7 +253,6 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .Merge(DeleteSelectedFile.ThrownExceptions)
             .Merge(DownloadSelectedFile.ThrownExceptions)
             .Merge(Refresh.ThrownExceptions)
-            .Merge(getBreadCrumbs.ThrownExceptions)
             .Log(this, $"Exception occured in provider {cloud.Name}")
             .Subscribe();
 
@@ -260,11 +267,8 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
             .Select(authenticated => authenticated ? _cloud.Parameters?.User : null)
             .Subscribe(user => state.User = user);
 
-        this.WhenActivated(ActivateAutoRefresh);
+        this.WhenActivated(ActivateRefreshOnStateChanges);
     }
-
-    [Reactive]
-    public partial int RefreshingIn { get; private set; }
 
     [Reactive]
     public partial IFileViewModel SelectedFile { get; set; }
@@ -327,33 +331,60 @@ public sealed partial class CloudViewModel : ReactiveObject, ICloudViewModel, IA
 
     public ReactiveCommand<string, string> SetPath { get; }
 
-    private void ActivateAutoRefresh(CompositeDisposable disposable)
+    private static string NormalizeInitialPath(string path, ICloud cloud)
+    {
+        if (cloud.Parameters?.Type != CloudType.Ftp || string.IsNullOrWhiteSpace(path))
+            return path;
+
+        var normalized = path.Replace('\\', '/');
+        while (normalized.Contains("//", StringComparison.Ordinal))
+            normalized = normalized.Replace("//", "/", StringComparison.Ordinal);
+
+        return normalized;
+    }
+
+    private IEnumerable<IFolderViewModel> CreatePathBreadCrumbs(
+        string path,
+        FolderViewModelFactory folderFactory)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return Enumerable.Empty<IFolderViewModel>();
+
+        var normalizedPath = path.Replace('\\', '/');
+        var parts = normalizedPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var folders = new List<IFolderViewModel>();
+        var currentPath = normalizedPath.StartsWith('/') ? "/" : string.Empty;
+
+        if (currentPath == "/")
+            folders.Add(folderFactory(new FolderModel("/", "/"), this));
+
+        foreach (var part in parts)
+        {
+            currentPath = currentPath switch
+            {
+                "" => part,
+                "/" => "/" + part,
+                _ => currentPath + "/" + part
+            };
+            folders.Add(folderFactory(new FolderModel(currentPath, part), this));
+        }
+
+        return folders;
+    }
+
+    private void UpdateFileSelection(IFileViewModel selectedFile)
+    {
+        foreach (var file in Files ?? Enumerable.Empty<IFileViewModel>())
+            file.IsSelected = ReferenceEquals(file, selectedFile);
+    }
+
+    private void ActivateRefreshOnStateChanges(CompositeDisposable disposable)
     {
         this.WhenAnyValue(x => x.Auth.IsAuthenticated)
+            .DistinctUntilChanged()
             .Where(authenticated => authenticated)
             .Select(_ => Unit.Default)
             .InvokeCommand(Refresh)
-            .DisposeWith(disposable);
-
-        Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1))
-            .Select(_ => RefreshingIn - 1)
-            .Where(value => value >= 0)
-            .ObserveOn(_scheduler)
-            .Subscribe(x => RefreshingIn = x)
-            .DisposeWith(disposable);
-
-        this.WhenAnyValue(x => x.RefreshingIn)
-            .Skip(1)
-            .Where(refreshing => refreshing == 0)
-            .Log(this, $"Refreshing provider {_cloud.Name} path {CurrentPath}")
-            .Select(_ => Unit.Default)
-            .InvokeCommand(Refresh)
-            .DisposeWith(disposable);
-
-        Refresh.Select(_ => 30)
-            .StartWith(30)
-            .ObserveOn(_scheduler)
-            .Subscribe(x => RefreshingIn = x)
             .DisposeWith(disposable);
 
         this.WhenAnyValue(x => x.CanInteract)

@@ -55,8 +55,6 @@ public interface ICloudViewModel : INotifyPropertyChanged
 
     bool HideBreadCrumbs { get; }
 
-    int RefreshingIn { get; }
-
     string CurrentPath { get; }
 
     string Description { get; }

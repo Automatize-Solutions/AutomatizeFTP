@@ -63,8 +63,6 @@ public class DesignTimeCloudViewModel : ReactiveObject, ICloudViewModel
 
     public bool HideBreadCrumbs { get; }
 
-    public int RefreshingIn { get; } = 30;
-
     public string CurrentPath { get; } = "/home/files";
 
     public IEnumerable<IFolderViewModel> BreadCrumbs { get; } =

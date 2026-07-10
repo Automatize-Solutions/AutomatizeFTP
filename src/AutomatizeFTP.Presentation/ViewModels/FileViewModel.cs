@@ -11,6 +11,7 @@ public delegate IFileViewModel FileViewModelFactory(FileModel file, ICloudViewMo
 public sealed class FileViewModel : ReactiveObject, IFileViewModel
 {
     private readonly FileModel _file;
+    private bool _isSelected;
 
     public FileViewModel(ICloudViewModel provider, FileModel file)
     {
@@ -23,6 +24,12 @@ public sealed class FileViewModel : ReactiveObject, IFileViewModel
     public string Modified => _file.Modified?.ToString(CultureInfo.InvariantCulture) ?? "A long time ago";
 
     public string Size => _file.Size == 0 ? "Unknown" : _file.Size.ByteSizeToString();
+
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => this.RaiseAndSetIfChanged(ref _isSelected, value);
+    }
 
     public bool IsFolder => _file.IsFolder;
 

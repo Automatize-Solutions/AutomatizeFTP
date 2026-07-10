@@ -7,7 +7,7 @@ namespace AutomatizeFTP.Services.Providers;
 
 public sealed class FtpCloud : ICloud
 {
-    private static readonly string[] PathSeparators = { "\\", "/" };
+    private static readonly string[] PathSeparators = { "/" };
     private readonly ISubject<bool> _isAuthorized = new ReplaySubject<bool>();
     private Func<AsyncFtpClient> _factory;
 
@@ -67,7 +67,9 @@ public sealed class FtpCloud : ICloud
         await connection.Connect().ConfigureAwait(false);
         for (var i = 0; i < pathParts.Count; i++)
         {
-            var fullPath = string.Join(PathSeparators[0], pathParts.Take(i + 1));
+            var fullPath = i == 0
+                ? "/"
+                : "/" + string.Join(PathSeparators[0], pathParts.Skip(1).Take(i));
             var name = pathParts[i];
             var listing = await connection.GetListing(fullPath).ConfigureAwait(false);
             var folder = new FolderModel(
@@ -87,7 +89,7 @@ public sealed class FtpCloud : ICloud
     {
         using var connection = _factory();
         await connection.Connect().ConfigureAwait(false);
-        var directory = Path.Combine(path, name);
+        var directory = CombineRemotePath(path, name);
         await connection.CreateDirectory(directory).ConfigureAwait(false);
         await connection.Disconnect().ConfigureAwait(false);
     }
@@ -96,8 +98,8 @@ public sealed class FtpCloud : ICloud
     {
         using var connection = _factory();
         await connection.Connect().ConfigureAwait(false);
-        var directoryName = Path.GetDirectoryName(path);
-        var newName = Path.Combine(directoryName, name);
+        var directoryName = GetRemoteDirectory(path);
+        var newName = CombineRemotePath(directoryName, name);
         await connection.Rename(path, newName).ConfigureAwait(false);
         await connection.Disconnect().ConfigureAwait(false);
     }
@@ -122,7 +124,7 @@ public sealed class FtpCloud : ICloud
     {
         using var connection = _factory();
         await connection.Connect().ConfigureAwait(false);
-        var path = Path.Combine(to, name);
+        var path = CombineRemotePath(to, name);
         await connection.UploadStream(@from, path).ConfigureAwait(false);
         await connection.Disconnect().ConfigureAwait(false);
     }
@@ -133,5 +135,14 @@ public sealed class FtpCloud : ICloud
         await connection.Connect().ConfigureAwait(false);
         await connection.DownloadStream(to, @from).ConfigureAwait(false);
         await connection.Disconnect().ConfigureAwait(false);
+    }
+
+    private static string CombineRemotePath(string path, string name) =>
+        $"{path.TrimEnd('/')}/{name.TrimStart('/')}";
+
+    private static string GetRemoteDirectory(string path)
+    {
+        var separator = path.LastIndexOf('/');
+        return separator <= 0 ? "/" : path[..separator];
     }
 }

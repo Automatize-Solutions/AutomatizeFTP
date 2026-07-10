@@ -3,86 +3,183 @@
              xmlns:views="clr-namespace:AutomatizeFTP.Presentation.Avalonia.Views"
              xmlns:interfaces="clr-namespace:AutomatizeFTP.Presentation.Interfaces;assembly=AutomatizeFTP.Presentation"
              xmlns:designTime="clr-namespace:AutomatizeFTP.Presentation.DesignTime;assembly=AutomatizeFTP.Presentation"
-             x:Class="AutomatizeFTP.Presentation.Avalonia.Views.ProviderView">
+             x:Class="AutomatizeFTP.Presentation.Avalonia.Views.ProviderView"
+             x:CompileBindings="False">
     <Design.DataContext>
         <designTime:DesignTimeCloudViewModel />
     </Design.DataContext>
+    <UserControl.Resources>
+        <ControlTheme x:Key="BreadcrumbItemTheme" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Padding="{TemplateBinding Padding}"
+                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Background="{TemplateBinding Background}"
+                                      BorderBrush="{TemplateBinding BorderBrush}"
+                                      BorderThickness="{TemplateBinding BorderThickness}"
+                                      CornerRadius="{TemplateBinding CornerRadius}" />
+                </ControlTemplate>
+            </Setter>
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            </Style>
+        </ControlTheme>
+        <ControlTheme x:Key="FileItemTheme" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Padding="{TemplateBinding Padding}"
+                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Background="{TemplateBinding Background}"
+                                      BorderBrush="{TemplateBinding BorderBrush}"
+                                      BorderThickness="{TemplateBinding BorderThickness}"
+                                      CornerRadius="{TemplateBinding CornerRadius}" />
+                </ControlTemplate>
+            </Setter>
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource HoverSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            </Style>
+            <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource AccentSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            </Style>
+            <Style Selector="^:selected">
+                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                <Setter Property="BorderThickness" Value="3,0,0,0" />
+            </Style>
+            <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource AccentSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            </Style>
+            <Style Selector="^:selected:pointerover">
+                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                <Setter Property="BorderThickness" Value="3,0,0,0" />
+            </Style>
+        </ControlTheme>
+    </UserControl.Resources>
     <UserControl.Styles>
-      <Style Selector="ListBox.BreadCrumb">
-        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden"/>
-        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden"/>
-        <Setter Property="Margin" Value="5"/>
-        <Setter Property="ItemsPanel">
-          <Setter.Value>
-            <ItemsPanelTemplate>
-              <StackPanel Orientation="Horizontal"/>
-            </ItemsPanelTemplate>
-          </Setter.Value>
-        </Setter>
-        <Setter Property="ItemTemplate">
-          <Setter.Value>
-            <DataTemplate DataType="interfaces:IFolderViewModel">
-              <views:FolderView DataContext="{Binding}" />
-            </DataTemplate>
-          </Setter.Value>
-        </Setter>
-      </Style>
-      <Style Selector="ListBox.BreadCrumb > Border">
-        <Setter Property="CornerRadius" Value="5"/>
-        <Setter Property="Background" Value="{DynamicResource ThemeCardBrush}"/>
-      </Style>
-      <Style Selector="ListBox.BreadCrumb > ListBoxItem">
-        <Setter Property="Padding" Value="0"/>
-        <Setter Property="Margin" Value="0"/>
-        <Setter Property="BorderThickness" Value="0"/>
-      </Style>
+        <Style Selector="Button">
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="CornerRadius" Value="7" />
+        </Style>
+        <Style Selector="Button.icon">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="32" />
+        </Style>
+        <Style Selector="Button.action">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
+        <Style Selector="Button.primaryAction">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
+        </Style>
+        <Style Selector="Button.action:pointerover">
+            <Setter Property="Background" Value="{DynamicResource HoverSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        </Style>
+        <Style Selector="Button.primaryAction:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+        </Style>
+        <Style Selector="ListBox.BreadCrumb">
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden" />
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate DataType="interfaces:IFolderViewModel">
+                        <views:FolderView DataContext="{Binding}" />
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Styles>
+
     <Grid>
-        <Grid RowDefinitions="Auto,*,Auto,Auto">
-            <Grid Grid.Row="0" Margin="5" ColumnDefinitions="Auto,*,Auto">
-                <Button Grid.Column="0"
-                        Command="{Binding Back}"
-                        ToolTip.Tip="Back"
-                        Classes="Primary">
-                <Image Height="16">
-                  <Image.Source>
-                    <DrawingImage Drawing="{DynamicResource ArrowUp}"/>
-                  </Image.Source>
-                </Image>
-              </Button>
-                <TextBlock Grid.Column="1"
-                           IsVisible="{Binding HideBreadCrumbs}"
-                           Text="{Binding CurrentPath}"
-                           VerticalAlignment="Center"
-                           FontSize="14"
-                           Margin="15 0" />
-                <ListBox Grid.Column="1"
-                         IsVisible="{Binding ShowBreadCrumbs}"
-                         ItemsSource="{Binding BreadCrumbs}"
-                         Classes="BreadCrumb"/>          
-                <Button Grid.Column="2"
-                        Command="{Binding Open}"
-                        HorizontalAlignment="Stretch"
-                        ToolTip.Tip="Open"
-                        Classes="Primary">
-                  <Image Height="16">
-                    <Image.Source>
-                      <DrawingImage Drawing="{DynamicResource ArrowDown}"/>
-                    </Image.Source>
-                  </Image>
-                </Button>
-            </Grid>
-            <Border Grid.Row="1" 
-                    BorderThickness="0 2 0 2"
-                    BorderBrush="{DynamicResource ThemeBorderLowBrush}">
+      <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
+        <!-- Provider title -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="2,0,2,18">
+            <StackPanel>
+                <TextBlock Text="{Binding Name}" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <Ellipse Width="7" Height="7" Fill="{DynamicResource SuccessBrush}" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Connected}" Foreground="{DynamicResource SuccessBrush}" FontSize="11" Margin="7,0,12,0" />
+                    <TextBlock Text="{Binding Description}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
+                </StackPanel>
+            </StackPanel>
+            <Button Grid.Column="1" Classes="action" Content="{DynamicResource Disconnect}"
+                    IsVisible="{Binding CanLogout}" Command="{Binding Logout}" VerticalAlignment="Center" />
+        </Grid>
+
+        <!-- Navigation and path -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+            <Button Grid.Column="0" Classes="icon" Content="‹" FontSize="24"
+                    Command="{Binding Back}" ToolTip.Tip="{DynamicResource BackTooltip}" />
+            <Border Grid.Column="1" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                    CornerRadius="7" Margin="8,0" Padding="8,0">
                 <Grid>
-                    <ListBox Padding="0"
-                             Background="{DynamicResource ThemeCardBrush}"
-                             BorderThickness="0"
-                             SelectionMode="Toggle"
-                             ItemsSource="{Binding Files}"
-                             IsVisible="{Binding IsReady}"
-                             ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                    <TextBlock Text="{Binding CurrentPath}" IsVisible="{Binding HideBreadCrumbs}"
+                               Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" FontSize="12" />
+                    <ListBox ItemsSource="{Binding BreadCrumbs}" Classes="BreadCrumb"
+                             ItemContainerTheme="{StaticResource BreadcrumbItemTheme}"
+                             IsVisible="{Binding ShowBreadCrumbs}" Padding="0" />
+                </Grid>
+            </Border>
+            <Button Grid.Column="2" Classes="icon" Content="↻" FontSize="18"
+                    Command="{Binding Refresh}" ToolTip.Tip="{DynamicResource RefreshTooltip}" />
+        </Grid>
+
+        <!-- File browser -->
+        <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="9">
+            <Grid RowDefinitions="38,*">
+                <Border Grid.Row="0" Background="{DynamicResource SurfaceSubtleBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
+                        CornerRadius="9,9,0,0" Padding="14,0">
+                    <Grid ColumnDefinitions="28,*,130,120,150">
+                        <TextBlock Grid.Column="0" Text="" />
+                        <TextBlock Grid.Column="1" Text="{DynamicResource Name}" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="{DynamicResource Type}" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="3" Text="{DynamicResource Size}" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="4" Text="{DynamicResource Modified}" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+                <Grid Grid.Row="1">
+                    <ListBox Classes="files" Padding="0" ItemsSource="{Binding Files}"
+                             ItemContainerTheme="{StaticResource FileItemTheme}"
+                             IsVisible="{Binding IsReady}" ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                              SelectedItem="{Binding SelectedFile, Mode=TwoWay}">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="interfaces:IFileViewModel">
@@ -90,102 +187,66 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <Grid IsVisible="{Binding HasErrorMessage}" 
-                          Background="{DynamicResource ThemeCardBrush}">
-                        <StackPanel VerticalAlignment="Center">
-                            <Ellipse Width="10" Height="10"
-                                     HorizontalAlignment="Center"
-                                     Fill="#ff0000"
-                                     Margin="10" />
-                            <TextBlock HorizontalAlignment="Center"
-                                       Text="Can't perform the operation, an error has occured."/>
-                        </StackPanel>
-                    </Grid>
-                    <Grid IsVisible="{Binding IsCurrentPathEmpty}" Background="{DynamicResource ThemeCardBrush}">
-                        <StackPanel VerticalAlignment="Center">
-                            <Ellipse Width="10" Height="10"
-                                     HorizontalAlignment="Center"
-                                     Fill="#ff0000"
-                                     Margin="10" />
-                            <TextBlock HorizontalAlignment="Center"
-                                       Text="Whoops, no files here!" />
-                        </StackPanel>
-                    </Grid>
-                    <Grid IsVisible="{Binding IsLoading}" 
-                          Background="{DynamicResource ThemeCardBrush}">
-                        <StackPanel VerticalAlignment="Center">
-                            <ProgressBar HorizontalAlignment="Stretch"
-                                         IsIndeterminate="{Binding IsLoading}" />
-                            <TextBlock HorizontalAlignment="Center"
-                                       Text="Please, wait..." />
-                        </StackPanel>
-                    </Grid>
-                    <Grid IsVisible="{Binding Folder.IsVisible}" 
-                          Background="{DynamicResource ThemeCardBrush}">
+                    <StackPanel IsVisible="{Binding IsLoading}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+                        <ProgressBar Width="220" IsIndeterminate="True" />
+                        <TextBlock Text="{DynamicResource LoadingFiles}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding IsCurrentPathEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="7">
+                        <TextBlock Text="{DynamicResource EmptyFolder}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"
+                                   HorizontalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource EmptyFolderText}" Foreground="{DynamicResource TextMutedBrush}" FontSize="12" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding HasErrorMessage}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="7">
+                        <TextBlock Text="{DynamicResource LoadError}" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource DangerBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource LoadErrorText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                    </StackPanel>
+                    <Grid IsVisible="{Binding Folder.IsVisible}" Background="{DynamicResource SurfaceBrush}">
                         <views:CreateFolderView DataContext="{Binding Folder}" />
                     </Grid>
-                    <Grid IsVisible="{Binding Rename.IsVisible}" 
-                          Background="{DynamicResource ThemeCardBrush}">
+                    <Grid IsVisible="{Binding Rename.IsVisible}" Background="{DynamicResource SurfaceBrush}">
                         <views:RenameFileView DataContext="{Binding Rename}" />
                     </Grid>
                 </Grid>
-            </Border>
-            <Grid Grid.Row="2" Margin="5 5 5 0" ColumnDefinitions="*,*,2*,*,*">
-                <Button Grid.Column="0"
-                        Content="Delete"
-                        Classes="Primary"
-                        HorizontalAlignment="Stretch"
-                        Command="{Binding DeleteSelectedFile}" />
-                <Button Grid.Column="1"
-                        Content="Rename"
-                        Classes="Primary"
-                        HorizontalAlignment="Stretch"
-                        Command="{Binding Rename.Open}"/>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" 
-                            Margin="5" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding SelectedFile.Name}"
-                               Opacity="0.5" />
-                </StackPanel>
-                <Button Grid.Column="3"
-                        Content="Upload"
-                        Classes="Primary"
-                        HorizontalAlignment="Stretch"
-                        Command="{Binding UploadToCurrentPath}" />
-                <Button Grid.Column="4"
-                        Content="Download"
-                        Classes="Primary"
-                        HorizontalAlignment="Stretch"
-                        Command="{Binding DownloadSelectedFile}" />
             </Grid>
-            <Grid Grid.Row="3" Margin="5 0 5 5" ColumnDefinitions="*,*,2*,*,*">
-                <Button Grid.Column="0"
-                        Content="Logout"
-                        Classes="Primary"
-                        HorizontalAlignment="Stretch"
-                        Command="{Binding Logout}" />
-                <Button Grid.Column="1"
-                        Content="Unselect"
-                        Classes="Primary"
-                        HorizontalAlignment="Stretch"
-                        Command="{Binding UnselectFile}" />
-                <StackPanel Grid.Column="2" Orientation="Horizontal" 
-                            Margin="5" VerticalAlignment="Center">
-                    <TextBlock Text="Refreshing in: " />
-                    <TextBlock Text="{Binding RefreshingIn}" />
-                </StackPanel>
-                <Button Grid.Column="3" 
-                        Content="Create" 
-                        Classes="Primary"
-                        HorizontalAlignment="Stretch" 
-                        Command="{Binding Folder.Open}"/>
-                <Button Grid.Column="4"
-                        Content="Refresh"
-                        HorizontalAlignment="Stretch"
-                        Command="{Binding Refresh}" />
-            </Grid>
+        </Border>
+
+        <!-- Actions -->
+        <Grid Grid.Row="3" ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" Margin="0,12,0,12">
+            <Button Grid.Column="0" Classes="action" Content="{DynamicResource NewFolder}" Command="{Binding Folder.Open}" />
+            <Button Grid.Column="1" Classes="action" Content="{DynamicResource Rename}" Command="{Binding Rename.Open}" Margin="8,0,0,0" />
+            <TextBlock Grid.Column="2" Text="{Binding SelectedFile.Name}" Foreground="{DynamicResource TextSecondaryBrush}"
+                       VerticalAlignment="Center" Margin="14,0" TextTrimming="CharacterEllipsis" />
+            <Button Grid.Column="3" Classes="action" Content="{DynamicResource Download}" Command="{Binding DownloadSelectedFile}" />
+            <Button Grid.Column="4" Classes="primaryAction" Content="{DynamicResource Upload}" Command="{Binding UploadToCurrentPath}" Margin="8,0,0,0" />
+            <Button Grid.Column="5" Classes="action" Content="{DynamicResource Delete}" Command="{Binding DeleteSelectedFile}" Margin="8,0,0,0" />
         </Grid>
-        <Grid IsVisible="{Binding Auth.IsAnonymous}">
+
+        <!-- Transfer queue: intentionally empty until a transfer is running -->
+        <Border Grid.Row="4" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="9"
+                Padding="16,12" MinHeight="100">
+            <Grid RowDefinitions="Auto,*">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{DynamicResource TransferQueue}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <Border Background="{DynamicResource AccentSurfaceBrush}" CornerRadius="9" Padding="7,2" Margin="8,0,0,0">
+                            <TextBlock Text="{DynamicResource ActiveTransfers}" Foreground="{DynamicResource AccentBrush}" FontSize="10" />
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="{DynamicResource TransferQueueHint}"
+                               Foreground="{DynamicResource TextMutedBrush}" FontSize="11" />
+                </Grid>
+                <TextBlock Grid.Row="1" Text="{DynamicResource TransfersEmpty}"
+                           Foreground="{DynamicResource TextMutedBrush}" FontSize="11" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+      </Grid>
+
+      <Grid IsVisible="{Binding Auth.IsAnonymous}" Background="{DynamicResource AppBackgroundBrush}">
+        <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12"
+                Width="420" Height="460" HorizontalAlignment="Center" VerticalAlignment="Center">
             <views:AuthView DataContext="{Binding Auth}" />
-        </Grid>
+        </Border>
+      </Grid>
     </Grid>
 </UserControl>
